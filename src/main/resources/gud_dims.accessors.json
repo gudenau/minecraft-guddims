@@ -1,0 +1,17 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "net.gudenau.minecraft.dims.accessor",
+  "compatibilityLevel": "JAVA_16",
+  "mixins": [
+    "LevelStorage$SessionAccessor",
+    "MinecraftServerAccessor",
+    "TimerAccessor",
+    "WorldBorder$PropertiesAccessor"
+  ],
+  "client": [
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

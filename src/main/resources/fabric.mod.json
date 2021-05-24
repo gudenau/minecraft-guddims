@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "id": "gud_dims",
+  "version": "${version}",
+
+  "name": "gudDims",
+  "description": "All the dimmensions one could ever ask for!",
+  "authors": [
+    "gudenau"
+  ],
+  "contact": {
+    "homepage": "https://github.com/gudenau/minecraft-guddims",
+    "sources": "https://github.com/gudenau/minecraft-guddims",
+    "issues": "https://github.com/gudenau/minecraft-guddims/issues"
+  },
+
+  "license": "",
+  "icon": "assets/gud_dims/icon.png",
+
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "net.gudenau.minecraft.dims.Dims"
+    ],
+    "client": [
+      "net.gudenau.minecraft.dims.DimsClient"
+    ]
+  },
+  "mixins": [
+    "gud_dims.mixins.json",
+    "gud_dims.accessors.json"
+  ],
+
+  "depends": {
+    "fabricloader": ">=0.7.4",
+    "fabric": "*",
+    "minecraft": "1.17.x"
+  },
+  "suggests": {}
+}

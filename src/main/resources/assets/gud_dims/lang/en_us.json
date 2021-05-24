@@ -1,0 +1,24 @@
+{
+  "biome_controller.gud_dims.single": "Single",
+
+  "block.gud_dims.dimension_builder": "Dimension Builder",
+
+  "item.gud_dims.dimension_anchor": "Dimension Anchor",
+  "item.gud_dims.dimension_attribute": "Dimension Attribute",
+  "item.gud_dims.dimension_token": "Dimension Token",
+
+  "itemGroup.gud_dims.biomes": "Dimension Attributes: Biomes",
+  "itemGroup.gud_dims.biome_controllers": "Dimension Attributes: Biome Controllers",
+  "itemGroup.gud_dims.blocks": "Dimension Attributes: Blocks",
+  "itemGroup.gud_dims.colors": "Dimension Attributes: Colors",
+  "itemGroup.gud_dims.fluids": "Dimension Attributes: Fluids",
+  "itemGroup.gud_dims.group": "gudDims",
+
+  "tooltip.gud_dims.type": "Attribute Type: ",
+  "tooltip.gud_dims.type.biome": "Biome",
+  "tooltip.gud_dims.type.biome_controller": "Biome Controller",
+  "tooltip.gud_dims.type.block": "Block",
+  "tooltip.gud_dims.type.color": "Color",
+  "tooltip.gud_dims.type.fluid": "Fluid",
+  "tooltip.gud_dims.world": "World"
+}
