@@ -9,6 +9,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerWorldEvents;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.fabric.api.util.NbtType;
@@ -135,7 +136,9 @@ public final class DimRegistryImpl implements DimRegistry{
         synchronized(pendingDims){
             var worlds = ((MinecraftServerAccessor)server).getWorlds();
             for(var info : pendingDims){
-                worlds.put(info.getRegistryKey(), info.createWorld(server));
+                var world = info.createWorld(server);
+                worlds.put(info.getRegistryKey(), world);
+                ServerWorldEvents.LOAD.invoker().onWorldLoad(server, world);
             }
         }
     }
