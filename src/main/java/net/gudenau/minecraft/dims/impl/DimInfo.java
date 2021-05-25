@@ -178,7 +178,7 @@ final class DimInfo{
             .map((type)->WeatherController.create(new Random(), type))
             .orElseGet(()->WeatherController.createDefault(new Random()));
         
-        var gameRules = new DimensionGameRules();
+        var gameRules = new DimensionGameRules(server.getGameRules());
         
         return new DimensionWorldProperties(
             (ServerWorldProperties)server.getOverworld().getLevelProperties(),
