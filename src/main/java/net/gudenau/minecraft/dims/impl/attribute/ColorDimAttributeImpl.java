@@ -7,6 +7,11 @@ import net.minecraft.item.Items;
 import net.minecraft.util.DyeColor;
 import net.minecraft.util.Identifier;
 
+/**
+ * The backing implementation to the color attribute interface.
+ *
+ * @since 0.0.1
+ */
 public final class ColorDimAttributeImpl implements ColorDimAttribute{
     private final DyeColor color;
     private final Identifier id;
@@ -15,6 +20,7 @@ public final class ColorDimAttributeImpl implements ColorDimAttribute{
     public ColorDimAttributeImpl(DyeColor color, Identifier id){
         this.color = color;
         this.id = id;
+        // Bad but only done at init, so not super bad.
         this.item = switch(color){
             case WHITE -> Items.WHITE_DYE;
             case ORANGE -> Items.ORANGE_DYE;

@@ -33,6 +33,11 @@ import net.minecraft.util.DyeColor;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
 
+/**
+ * The server/client entry point for this mod.
+ *
+ * @since 0.0.1
+ */
 public final class Dims implements ModInitializer{
     public static final String MOD_ID = "gud_dims";
     

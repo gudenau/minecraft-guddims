@@ -14,7 +14,15 @@ import net.minecraft.world.timer.Timer;
 import net.minecraft.world.timer.TimerCallbackSerializer;
 import org.jetbrains.annotations.Nullable;
 
+/**
+ * The properties of a custom dimension.
+ *
+ * @since 0.0.1
+ */
 public final class DimensionWorldProperties implements ServerWorldProperties{
+    /**
+     * The overworld props for things that we just mirror from there.
+     */
     private final ServerWorldProperties overworldProps;
     private final String name;
     private final WeatherController weatherController;

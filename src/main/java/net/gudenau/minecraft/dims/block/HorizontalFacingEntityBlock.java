@@ -10,6 +10,11 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
+/**
+ * A block that has an entity and rotates about the vertical axis.
+ *
+ * @since 0.0.1
+ */
 public abstract class HorizontalFacingEntityBlock extends HorizontalFacingBlock implements BlockEntityProvider{
     protected HorizontalFacingEntityBlock(Settings settings){
         super(settings);

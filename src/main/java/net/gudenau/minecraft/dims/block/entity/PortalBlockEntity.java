@@ -11,7 +11,15 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.util.math.BlockPos;
 import org.jetbrains.annotations.Nullable;
 
+/**
+ * The block entity responsible for teleporting entities that touch a portal from this mod.
+ *
+ * @since 0.0.1
+ */
 public final class PortalBlockEntity extends BlockEntity{
+    /**
+     * The target of this portal, can be null.
+     */
     @Nullable private DimensionalTeleportTarget target;
     
     public PortalBlockEntity(BlockPos pos, BlockState state){
@@ -37,17 +45,32 @@ public final class PortalBlockEntity extends BlockEntity{
         }
     }
     
+    /**
+     * Teleports an entity if this target is not null.
+     *
+     * @param entity The entity to teleport
+     */
     public void teleport(Entity entity){
         if(target != null){
             entity.teleportToTarget(target);
         }
     }
     
+    /**
+     * Sets the target of this portal to the provided destination.
+     *
+     * @param target The new target
+     */
     public void setTarget(DimensionalTeleportTarget target){
         this.target = target;
         markDirty();
     }
     
+    /**
+     * Gets the current target, if it exists.
+     *
+     * @return The target or empty
+     */
     public Optional<DimensionalTeleportTarget> getTarget(){
         return Optional.ofNullable(target);
     }

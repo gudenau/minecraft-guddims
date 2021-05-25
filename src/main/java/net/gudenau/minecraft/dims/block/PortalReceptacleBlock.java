@@ -19,6 +19,13 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
+/**
+ * The block that is responsible for creating (and even destroying) portals from anchor items.
+ *
+ * The rotation logic in here is weird, but it works.
+ *
+ * @since 0.0.1
+ */
 public final class PortalReceptacleBlock extends EntityBlock{
     private static final DirectionProperty FACING = Properties.FACING;
     private static final IntProperty ROTATION = Dims.Blocks.Properties.ROTATION4;
@@ -32,6 +39,12 @@ public final class PortalReceptacleBlock extends EntityBlock{
         );
     }
     
+    /**
+     * Gets the state for a portal that has the correct axis for a given receptacle state.
+     *
+     * @param receptacleState The state of a receptacle
+     * @return The state of a portal
+     */
     public static BlockState getPortalState(BlockState receptacleState){
         if(!receptacleState.isOf(Dims.Blocks.PORTAL_RECEPTACLE)){
             throw new IllegalArgumentException("receptacleState is not a receptacle");
@@ -47,6 +60,10 @@ public final class PortalReceptacleBlock extends EntityBlock{
     @Deprecated
     @Override
     public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit){
+        if(world.isClient()){
+            return ActionResult.SUCCESS;
+        }
+        
         var entity = world.getBlockEntity(pos);
         if(entity instanceof PortalReceptacleBlockEntity){
             return ((PortalReceptacleBlockEntity)entity).onUse(player, hand, player.getStackInHand(hand));
@@ -60,9 +77,29 @@ public final class PortalReceptacleBlock extends EntityBlock{
     public BlockState getPlacementState(ItemPlacementContext ctx){
         var state = getDefaultState();
         
+        /*
+        Here be funky code
+        
+        So the placement logic has two jobs. To determine which side is down, and which rotation faces the player. The
+        rotation depends on the "down" side of the block.
+        
+        +--------+
+        |\     / |
+        |  \ /   |
+        |  / \   |
+        |/     \ |
+        +--------+
+        
+        The down position is based on a square which each direction being a different placement direction. This square
+        is located on the face that the player clicks. After that "down" for the block is determined we iterate over the
+        4 possible rotations and figure out the closest to the player's look vector. Cheesy and crappy, but it works
+        because there are so few states to check and we don't need to do it often.
+         */
+        
         var blockPos = ctx.getBlockPos();
         var hitPos = ctx.getHitPos().subtract(blockPos.getX(), blockPos.getY(), blockPos.getZ());
         var hitSide = ctx.getSide();
+        // This finds which direction is "down"
         var hitDir = switch(hitSide.getAxis()){
             case X -> {
                 var hitX = (float)hitPos.y;
@@ -128,6 +165,7 @@ public final class PortalReceptacleBlock extends EntityBlock{
             }
         };
         
+        // And this finds the rotation
         var directions = PortalBlock.DIRECTIONS[hitDir.getAxis().ordinal()];
         var lookVector = ctx.getPlayer().getRotationVec(1);
         int bestFit = -1;

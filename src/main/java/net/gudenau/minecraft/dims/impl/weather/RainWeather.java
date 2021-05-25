@@ -2,6 +2,11 @@ package net.gudenau.minecraft.dims.impl.weather;
 
 import net.minecraft.nbt.NbtCompound;
 
+/**
+ * The weather controller for dimensions where it always rains.
+ *
+ * @since 0.0.1
+ */
 public final class RainWeather implements WeatherController{
     @Override
     public void tick(){}

@@ -13,6 +13,11 @@ import net.minecraft.client.texture.TextureManager;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
 
+/**
+ * A generic tooltip component that renders a single items on hover.
+ *
+ * @since 0.0.1
+ */
 @Environment(EnvType.CLIENT)
 public final class ItemStackTooltipComponent implements TooltipComponent{
     private final ItemStack stack;

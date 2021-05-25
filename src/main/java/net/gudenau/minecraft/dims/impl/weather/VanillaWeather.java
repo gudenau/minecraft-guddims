@@ -3,6 +3,12 @@ package net.gudenau.minecraft.dims.impl.weather;
 import java.util.Random;
 import net.minecraft.nbt.NbtCompound;
 
+/**
+ * The weather controller for dimensions with vanilla weather. Also provides a scale factor for the speed at which the
+ * weather changes.
+ *
+ * @since 0.0.1
+ */
 public final class VanillaWeather implements WeatherController{
     private final Random random;
     private int scale;

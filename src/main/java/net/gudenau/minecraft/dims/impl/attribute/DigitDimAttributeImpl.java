@@ -5,6 +5,11 @@ import net.minecraft.util.Identifier;
 
 import static net.gudenau.minecraft.dims.Dims.MOD_ID;
 
+/**
+ * The backing implementation to the digit attribute interface.
+ *
+ * @since 0.0.1
+ */
 public final class DigitDimAttributeImpl implements DigitDimAttribute{
     private final int value;
     private final Identifier id;

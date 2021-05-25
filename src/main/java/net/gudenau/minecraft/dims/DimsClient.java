@@ -15,6 +15,11 @@ import net.minecraft.client.color.world.BiomeColors;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.util.registry.RegistryKey;
 
+/**
+ * The client entry point for this mod.
+ *
+ * @since 0.0.1
+ */
 @Environment(EnvType.CLIENT)
 public final class DimsClient implements ClientModInitializer{
     @Override

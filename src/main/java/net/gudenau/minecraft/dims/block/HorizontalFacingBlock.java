@@ -15,6 +15,13 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
+/**
+ * A block with rotation about the vertical axis.
+ *
+ * Better than the MC one because it doesn't assume you added the state stuff yourself, otherwise identical.
+ *
+ * @since 0.0.1
+ */
 public abstract class HorizontalFacingBlock extends Block{
     protected static final DirectionProperty FACING = Properties.HORIZONTAL_FACING;
     

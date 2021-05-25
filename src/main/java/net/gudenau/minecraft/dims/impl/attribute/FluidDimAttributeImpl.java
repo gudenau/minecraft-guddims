@@ -5,6 +5,11 @@ import net.minecraft.fluid.Fluid;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Identifier;
 
+/**
+ * The backing implementation to the fluid attribute interface.
+ *
+ * @since 0.0.1
+ */
 public final class FluidDimAttributeImpl implements FluidDimAttribute{
     private final Fluid fluid;
     private final Identifier id;

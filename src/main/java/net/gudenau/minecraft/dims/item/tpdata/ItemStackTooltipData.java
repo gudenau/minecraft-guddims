@@ -8,6 +8,11 @@ import net.minecraft.client.gui.tooltip.TooltipComponent;
 import net.minecraft.client.item.TooltipData;
 import net.minecraft.item.ItemStack;
 
+/**
+ * A generic tooltip component that renders a single item on hover.
+ *
+ * @since 0.0.1
+ */
 @EnvironmentInterface(value = EnvType.CLIENT, itf = CustomTooltipData.class)
 public final class ItemStackTooltipData implements TooltipData, CustomTooltipData{
     private final ItemStack stack;

@@ -16,6 +16,11 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 
+/**
+ * This block is used to create an anchor from 12 ender eyes and a token (not consumed)
+ *
+ * @since 0.0.1
+ */
 public final class AnchorMinterBlock extends Block{
     public AnchorMinterBlock(Settings settings){
         super(settings);
@@ -25,26 +30,31 @@ public final class AnchorMinterBlock extends Block{
     @Deprecated
     @Override
     public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit){
+        // Server only, no exceptions
         if(world.isClient()){
             return ActionResult.SUCCESS;
         }
         
+        // Check if it's a token being used
         var stack = player.getStackInHand(hand);
         if(stack.getItem() != Dims.Items.DIMENSION_TOKEN){
             return ActionResult.SUCCESS;
         }
     
+        // Check if the token has a dimension, it should...
         var worldKey = DimensionTokenItem.getWorld(stack);
         if(worldKey.isEmpty()){
             return ActionResult.SUCCESS;
         }
     
+        // Check if the player has 12 (or more) ender eyes or is creative
         var inventory = player.getInventory();
         if(!player.isCreative()){
             var remainingEyes = 12;
             for(int i = 0; i < inventory.size() && remainingEyes > 0; i++){
                 var current = inventory.getStack(i);
                 if(current.getItem() == Items.ENDER_EYE){
+                    // Negative is fine here
                     remainingEyes -= current.getCount();
                 }
             }
@@ -53,21 +63,26 @@ public final class AnchorMinterBlock extends Block{
             }
         }
         
+        // Get a handle to the world now that the requirements are satisfied
         var destinationWorld = world.getServer().getWorld(worldKey.get());
         if(destinationWorld == null){
             return ActionResult.SUCCESS;
         }
         
+        // Get the spawn position of the token
         var spawnPos = destinationWorld.getSpawnPos();
     
+        // and create a target out of it
         var target = new DimensionalTeleportTarget(
             new Vec3d(spawnPos.getX() + 0.5, spawnPos.getY(), spawnPos.getZ() + 0.5),
             0, 0,
             destinationWorld.getRegistryKey()
         );
+        // Create the new stack and set the target
         var anchorStack = new ItemStack(Dims.Items.DIMENSION_ANCHOR);
         DimensionAnchorItem.setTarget(anchorStack, target);
     
+        // Remove the ender eyes if the player is not in creative
         if(!player.isCreative()){
             int remainingEyes = 12;
             for(int i = 0; i < inventory.size() && remainingEyes > 0; i++){
@@ -80,6 +95,7 @@ public final class AnchorMinterBlock extends Block{
             }
         }
         
+        // And give the anchor to the player
         if(!inventory.insertStack(anchorStack)){
             var itemEntity = player.dropItem(anchorStack, true);
             if(itemEntity != null){

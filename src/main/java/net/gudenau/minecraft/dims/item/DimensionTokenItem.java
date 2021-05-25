@@ -21,6 +21,11 @@ import net.minecraft.util.registry.RegistryKey;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
+/**
+ * A token represents a dimension, it can not be used for teleportation directly.
+ *
+ * @since 0.0.1
+ */
 public final class DimensionTokenItem extends Item{
     public DimensionTokenItem(Settings settings){
         super(settings);
@@ -41,6 +46,12 @@ public final class DimensionTokenItem extends Item{
         return getAttributes(stack).map((attributes)->new ItemStackCollectionTooltipData(attributes.stream().map(DimAttribute::getPreviewStack)));
     }
     
+    /**
+     * Gets the world registry key that corresponds to the provided token.
+     *
+     * @param stack The stack to query
+     * @return The registry key or empty
+     */
     public static Optional<RegistryKey<World>> getWorld(ItemStack stack){
         var tag = stack.getTag();
         if(tag == null){
@@ -50,6 +61,15 @@ public final class DimensionTokenItem extends Item{
         return Optional.of(RegistryKey.of(Registry.WORLD_KEY, tag.getIdentifier("world")));
     }
     
+    /**
+     * Gets the attributes that where used to create this token.
+     *
+     * This should be done though the registry.
+     *
+     * @param stack The stack to query
+     * @return The attributes or empty
+     */
+    @Deprecated(forRemoval = true)
     public static Optional<List<DimAttribute>> getAttributes(ItemStack stack){
         var tag = stack.getTag();
         if(tag == null){
@@ -73,6 +93,14 @@ public final class DimensionTokenItem extends Item{
         return Optional.ofNullable(list.isEmpty() ? null : Collections.unmodifiableList(list));
     }
     
+    /**
+     * Creates a token from a registry key and a set of attributes.
+     *
+     * @param world The registry key
+     * @param attributes The attributes
+     * @return The new token stack
+     */
+    @Deprecated(forRemoval = true)
     public static ItemStack createToken(RegistryKey<World> world, List<DimAttribute> attributes){
         ItemStack stack = new ItemStack(Dims.Items.DIMENSION_TOKEN);
         var tag = stack.getOrCreateTag();

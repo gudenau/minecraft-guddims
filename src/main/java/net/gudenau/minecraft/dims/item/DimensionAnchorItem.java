@@ -19,6 +19,11 @@ import net.minecraft.util.registry.RegistryKey;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
+/**
+ * The item that allows users to set portal targets and teleport themselves.
+ *
+ * @since 0.0.1
+ */
 public final class DimensionAnchorItem extends Item{
     public DimensionAnchorItem(Settings settings){
         super(settings);
@@ -26,6 +31,7 @@ public final class DimensionAnchorItem extends Item{
     
     @Override
     public ActionResult useOnBlock(ItemUsageContext context){
+        // Check if the block is a portal
         var world = context.getWorld();
         var pos = context.getBlockPos();
         var state = world.getBlockState(pos);
@@ -33,17 +39,20 @@ public final class DimensionAnchorItem extends Item{
             return super.useOnBlock(context);
         }
         
+        // Make sure we don't have a target
         var stack = context.getStack();
         var target = getTarget(stack);
         if(target.isPresent()){
             return super.useOnBlock(context);
         }
         
+        // Get the portal entity
         var entity = world.getBlockEntity(pos);
         if(!(entity instanceof PortalBlockEntity)){
             return super.useOnBlock(context);
         }
         
+        // And set the target
         ((PortalBlockEntity)entity).getTarget().ifPresent((portalTarget)->setTarget(stack, portalTarget));
         return ActionResult.SUCCESS;
     }
@@ -56,6 +65,7 @@ public final class DimensionAnchorItem extends Item{
             return TypedActionResult.success(stack);
         }
         
+        // Implement double shift right click to clear
         if(user.isSneaking()){
             var tag = stack.getTag();
             if(tag != null){
@@ -69,10 +79,12 @@ public final class DimensionAnchorItem extends Item{
         }
         
         var targetOptional = getTarget(stack);
+        // Teleport the user if we have a target
         if(targetOptional.isPresent()){
             if(user.isCreative()){
                 user.teleportToTarget(targetOptional.get());
             }else{
+                // Consume a pearl
                 var inventory = user.getInventory();
                 var slot = inventory.getSlotWithStack(new ItemStack(Items.ENDER_PEARL));
                 if(slot != -1){
@@ -82,6 +94,7 @@ public final class DimensionAnchorItem extends Item{
                 }
             }
         }else{
+            // Set the target to the current location and look vector
             var target = new DimensionalTeleportTarget(
                 user.getPos(),
                 user.getYaw(),
@@ -100,6 +113,7 @@ public final class DimensionAnchorItem extends Item{
             return;
         }
 
+        // Tell the user about the target, if present.
         getTarget(stack).ifPresent((target)->{
             var pos = target.position();
             tooltip.add(new TranslatableText("tooltip.gud_dims.target.pos", pos.x, pos.y, pos.z));
@@ -108,7 +122,17 @@ public final class DimensionAnchorItem extends Item{
         });
     }
     
+    /**
+     * Gets the target from an anchor, if present.
+     *
+     * @param stack The stack to get the target from
+     * @return The target, or empty
+     */
     public static Optional<DimensionalTeleportTarget> getTarget(ItemStack stack){
+        if(stack.getItem() != Dims.Items.DIMENSION_ANCHOR){
+            return Optional.empty();
+        }
+        
         var tag = stack.getTag();
         if(tag == null){
             return Optional.empty();
@@ -121,7 +145,17 @@ public final class DimensionAnchorItem extends Item{
         return Optional.of(DimensionalTeleportTarget.fromNbt(tag.getCompound("target")));
     }
     
+    /**
+     * Sets the target of an anchor.
+     *
+     * @param stack The anchor stack to modify
+     * @param target The new target of the stack
+     */
     public static void setTarget(ItemStack stack, DimensionalTeleportTarget target){
+        if(stack.getItem() != Dims.Items.DIMENSION_ANCHOR){
+            return;
+        }
+        
         var tag = stack.getOrCreateTag();
         tag.put("target", target.toNbt());
     }

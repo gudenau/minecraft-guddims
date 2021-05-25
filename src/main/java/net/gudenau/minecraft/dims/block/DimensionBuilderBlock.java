@@ -15,6 +15,11 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
+/**
+ * The block that is responsible for creating dimensions for players.
+ *
+ * @since 0.0.1
+ */
 public final class DimensionBuilderBlock extends HorizontalFacingEntityBlock{
     public DimensionBuilderBlock(Settings settings){
         super(settings);
@@ -35,15 +40,18 @@ public final class DimensionBuilderBlock extends HorizontalFacingEntityBlock{
     @Deprecated
     @Override
     public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit){
+        // Server side only
         if(world.isClient()){
             return ActionResult.SUCCESS;
         }
         
+        // Make sure the block has the entity we need
         var rawEntity = world.getBlockEntity(pos);
         if(!(rawEntity instanceof DimensionBuilderBlockEntity)){
             return ActionResult.FAIL;
         }
     
+        // And make sure it is not building a dimension already
         var entity = (DimensionBuilderBlockEntity)rawEntity;
         boolean building = entity.isBuilding();
         
@@ -51,26 +59,28 @@ public final class DimensionBuilderBlock extends HorizontalFacingEntityBlock{
             return ActionResult.FAIL;
         }
         
+        // Request a new dimension
         if(player.isSneaking()){
             entity.build();
         }else{
+            // Inserting attribute items
             if(entity.getStack(0).isEmpty()){
+                // Check if it's actually a dim attribute
                 var stack = player.getStackInHand(hand);
                 if(stack.isEmpty() || !(stack.getItem() instanceof DimensionAttributeItem)){
                     return ActionResult.FAIL;
                 }
     
-                var copy = stack.copy();
-                copy.setCount(1);
-                entity.setStack(entity.size(), copy);
-                stack.decrement(1);
+                entity.setStack(entity.size(), stack.split(1));
             }else{
+                // Extract the result
                 var result = entity.removeStack(0);
                 if(!player.getInventory().insertStack(result)){
                     var droppedItem = player.dropItem(result, true);
                     if(droppedItem != null){
                         world.spawnEntity(droppedItem);
                     }else{
+                        // Just in case we can't extract it, put it back
                         entity.setStack(0, result);
                     }
                 }

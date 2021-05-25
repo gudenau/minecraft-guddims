@@ -33,6 +33,11 @@ import net.minecraft.util.registry.Registry;
 import net.minecraft.util.registry.RegistryKey;
 import net.minecraft.world.World;
 
+/**
+ * The implementation of the registry.
+ *
+ * @since 0.0.1
+ */
 @SuppressWarnings("SimplifyStreamApiCallChains")
 public final class DimRegistryImpl implements DimRegistry{
     public static final DimRegistryImpl INSTANCE = new DimRegistryImpl();
@@ -96,9 +101,9 @@ public final class DimRegistryImpl implements DimRegistry{
     
     @SuppressWarnings("unchecked")
     @Override
-    public <T extends DimAttribute> Optional<T> getAttribute(DimAttributeType dimAttributeType, Identifier attribute){
+    public <T extends DimAttribute> Optional<T> getAttribute(DimAttributeType attributeType, Identifier attribute){
         ensureInit();
-        return Optional.ofNullable(((Map<Identifier, T>)switch(dimAttributeType){
+        return Optional.ofNullable(((Map<Identifier, T>)switch(attributeType){
             case BLOCK -> blockAttributeMap;
             case FLUID -> fluidAttributeMap;
             case COLOR -> colorAttributeMap;
@@ -304,7 +309,7 @@ public final class DimRegistryImpl implements DimRegistry{
             .collect(Collectors.toUnmodifiableList());
         colorAttributeMap = toMap(colorAttributeList);
     
-        biomeControllerAttributeList = Stream.of(BiomeControllerDimAttribute.Controller.values())
+        biomeControllerAttributeList = Stream.of(BiomeControllerDimAttribute.ControllerType.values())
             .map(BiomeControllerDimAttributeImpl::new)
             .collect(Collectors.toUnmodifiableList());
         biomeControllerAttributeMap = toMap(biomeControllerAttributeList);

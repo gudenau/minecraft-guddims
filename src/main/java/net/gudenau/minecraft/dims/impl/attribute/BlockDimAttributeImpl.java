@@ -5,6 +5,12 @@ import net.minecraft.block.Block;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Identifier;
 
+/**
+ * The backing implementation to the block attribute interface.
+ *
+ * @since 0.0.1
+ */
+
 public final class BlockDimAttributeImpl implements BlockDimAttribute{
     private final Block block;
     private final Identifier id;

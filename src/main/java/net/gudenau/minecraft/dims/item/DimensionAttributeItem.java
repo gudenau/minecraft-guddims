@@ -18,6 +18,11 @@ import net.minecraft.util.registry.Registry;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
+/**
+ * An item that represents a single dimension attribute at a time.
+ *
+ * @since 0.0.1
+ */
 public final class DimensionAttributeItem extends Item{
     private final DimAttributeType type;
     
@@ -33,6 +38,7 @@ public final class DimensionAttributeItem extends Item{
     
     @Override
     public void appendStacks(ItemGroup group, DefaultedList<ItemStack> stacks){
+        // Since it is once instance of an item for a type, we need custom rules for the tabs.
         if(getGroup() == group){
             DimRegistry.getInstance().getAttributes(type).stream()
                 .map(DimensionAttributeItem::getStack)
@@ -40,6 +46,12 @@ public final class DimensionAttributeItem extends Item{
         }
     }
     
+    /**
+     * Gets an attribute from a stack, if it is present.
+     *
+     * @param stack The stack with the attribute
+     * @return The attribute or empty
+     */
     public static Optional<DimAttribute> getAttribute(ItemStack stack){
         if(!(stack.getItem() instanceof DimensionAttributeItem)){
             return Optional.empty();
@@ -54,6 +66,12 @@ public final class DimensionAttributeItem extends Item{
             .flatMap(type->DimRegistry.getInstance().getAttribute(type, tag.getIdentifier("Attribute")));
     }
     
+    /**
+     * Gets a stack that corresponds to an attribute.
+     *
+     * @param attribute The attribute
+     * @return The created stack
+     */
     public static ItemStack getStack(DimAttribute attribute){
         var stack = new ItemStack(switch(attribute.getType()){
             case BLOCK -> Dims.Items.DIMENSION_ATTRIBUTE_BLOCK;

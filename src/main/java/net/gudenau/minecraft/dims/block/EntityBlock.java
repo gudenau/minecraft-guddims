@@ -11,6 +11,13 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
+/**
+ * A block with an entity.
+ *
+ * Better than the MC one because this doesn't make the block invisible by default, otherwise the same thing.
+ *
+ * @since 0.0.1
+ */
 abstract class EntityBlock extends Block implements BlockEntityProvider{
     protected EntityBlock(Settings settings){
         super(settings);

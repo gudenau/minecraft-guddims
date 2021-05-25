@@ -9,6 +9,7 @@ import net.minecraft.util.DyeColor;
 
 @Extension
 public class DyeColorExtension {
+  // Mojank removed the int field for the color....
   private static final Object2IntMap<DyeColor> COLORS;
   static{
     var colors = new Object2IntOpenHashMap<DyeColor>(DyeColor.values().length);
@@ -19,6 +20,11 @@ public class DyeColorExtension {
     COLORS = Object2IntMaps.unmodifiable(colors);
   }
   
+  /**
+   * Gets the raw color of the dye.
+   *
+   * @return The color of the dye
+   */
   public static int getColor(@This DyeColor thiz) {
     return COLORS.getInt(thiz);
   }

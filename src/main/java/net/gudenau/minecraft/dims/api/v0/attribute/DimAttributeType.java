@@ -7,6 +7,13 @@ import net.minecraft.util.Identifier;
 
 import static net.gudenau.minecraft.dims.Dims.MOD_ID;
 
+/**
+ * A central location of all current dimension attribute types.
+ *
+ * TODO Make this extendable, maybe even generic
+ *
+ * @since 0.0.1
+ */
 public enum DimAttributeType{
     BLOCK("block"),
     FLUID("fluid"),
@@ -27,6 +34,7 @@ public enum DimAttributeType{
         VALUE_MAP = builder.build();
     }
     
+    @Deprecated(forRemoval = true)
     public static Optional<DimAttributeType> get(Identifier identifier){
         return Optional.ofNullable(VALUE_MAP.get(identifier));
     }
@@ -37,6 +45,13 @@ public enum DimAttributeType{
         id = new Identifier(MOD_ID, name);
     }
     
+    /**
+     * Gets the identifier associated with this attribute type.
+     *
+     * It is important that this is not dynamic, as it is used for serialization.
+     *
+     * @return The associated identifier
+     */
     public Identifier getId(){
         return id;
     }

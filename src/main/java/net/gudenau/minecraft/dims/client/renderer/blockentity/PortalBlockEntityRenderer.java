@@ -9,6 +9,11 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.state.property.Properties;
 import net.minecraft.util.math.Matrix4f;
 
+/**
+ * Renders the portal blocks.
+ *
+ * FIXME Make this not the end portal renderer, it should be something cool that is based off of the destination.
+ */
 public final class PortalBlockEntityRenderer implements BlockEntityRenderer<PortalBlockEntity>{
     @Override
     public void render(PortalBlockEntity endPortalBlockEntity, float f, MatrixStack matrixStack, VertexConsumerProvider vertexConsumerProvider, int i, int j){

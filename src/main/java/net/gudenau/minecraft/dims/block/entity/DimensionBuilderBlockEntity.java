@@ -25,14 +25,37 @@ import net.minecraft.world.World;
 import net.minecraft.world.explosion.Explosion;
 import org.jetbrains.annotations.Nullable;
 
+/**
+ * The entity for the block that is responsible for creating dimension tokens from a set of dimension attributes.
+ *
+ * @since 0.0.1
+ */
 public final class DimensionBuilderBlockEntity extends BlockEntity implements SidedInventory{
+    /**
+     * An empty array for sides that don't interact with this inventory to disable access.
+     */
     private static final int[] SLOTS_EMPTY = new int[0];
+    
+    /**
+     * An array with only the output slot for extracting tokens.
+     */
     private static final int[] SLOTS_EXTRACT = new int[]{
         0
     };
     
+    /**
+     * The current attributes in this block.
+     */
     private final List<ItemStack> attributeItems = new ArrayList<>();
+    
+    /**
+     * The created token or empty.
+     */
     private ItemStack output = ItemStack.EMPTY;
+    
+    /**
+     * The time remaining in the build process.
+     */
     private long buildingTime = 0;
     
     public DimensionBuilderBlockEntity(BlockPos pos, BlockState state){
@@ -73,14 +96,7 @@ public final class DimensionBuilderBlockEntity extends BlockEntity implements Si
     }
     
     public static void tick(World world, BlockPos pos, BlockState state, DimensionBuilderBlockEntity blockEntity){
-        if(blockEntity.buildingTime > 0){
-            world.forEachPlayer((player)->{
-                if(blockEntity.buildingTime != 1){
-                    player.sendMessage(Text.formated("Building time has %d ticks left", blockEntity.buildingTime), true);
-                }else{
-                    player.sendMessage(Text.of("Building time has 1 tick left"), true);
-                }
-            });
+        if(blockEntity.isBuilding()){
             if(--blockEntity.buildingTime == 0){
                 blockEntity.craft();
             }
@@ -88,7 +104,16 @@ public final class DimensionBuilderBlockEntity extends BlockEntity implements Si
         }
     }
     
+    /**
+     * The method that consumes the attributes, creates a new dimension and creates the corresponding token.
+     */
     private void craft(){
+        // Make sure we are not overriding anything
+        if(!output.isEmpty()){
+            return;
+        }
+        
+        // This filters the empty stacks, gets the attributes, filters invalid attributes and collects into a list.
         var attributes = attributeItems.stream()
             .filter((stack)->!stack.isEmpty())
             .map(DimensionAttributeItem::getAttribute)
@@ -97,11 +122,13 @@ public final class DimensionBuilderBlockEntity extends BlockEntity implements Si
             .collect(Collectors.toUnmodifiableList());
         
         var registry = DimRegistry.getInstance();
+        // The registry implementation does most of the heavy lifting here
         var dimension = registry.createDimension(world.getServer(), attributes);
         if(dimension.isEmpty()){
             return;
         }
         
+        // TODO Make this not an explosion
         world.createExplosion(null, pos.getX(), pos.getY(), pos.getZ(), 5, false, Explosion.DestructionType.NONE);
         //noinspection OptionalGetWithoutIsPresent
         output = DimensionTokenItem.createToken(registry.getDimensionKey(dimension.get()).get(), attributes);
@@ -110,6 +137,7 @@ public final class DimensionBuilderBlockEntity extends BlockEntity implements Si
     
     @Override
     public int size(){
+        // Can always add another attribute!
         return attributeItems.size() + 1;
     }
     
@@ -242,12 +270,22 @@ public final class DimensionBuilderBlockEntity extends BlockEntity implements Si
         return dir == Direction.DOWN && slot == 0;
     }
     
+    /**
+     * Checks if this block is building a token.
+     *
+     * @return True if this block is building a token
+     */
     public boolean isBuilding(){
-        return buildingTime > 0;
+        return buildingTime > 0 && output.isEmpty();
     }
     
+    /**
+     * Requests a new token to be created out of the inserted attributes.
+     */
     public void build(){
-        buildingTime = attributeItems.size() * 20 + 20;
-        markDirty();
+        if(!isBuilding() && output.isEmpty()){
+            buildingTime = attributeItems.size() * 20 + 20;
+            markDirty();
+        }
     }
 }

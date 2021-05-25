@@ -9,12 +9,23 @@ import net.minecraft.world.border.WorldBorder.Properties;
 
 @Extension
 public class WorldBorder$PropertiesExtension {
+  /**
+   * A helper to write world border information to a tag.
+   *
+   * @return The written tag
+   */
   public static NbtCompound toNbt(@This Properties thiz) {
     var compound = new NbtCompound();
     thiz.writeNbt(compound);
     return compound;
   }
   
+  /**
+   * Creates world border properties from a tag.
+   *
+   * @param tag The tag to read
+   * @return The created properties
+   */
   @Extension
   public static WorldBorder.Properties fromNbt(NbtCompound tag){
     return WorldBorder$PropertiesAccessor.init(

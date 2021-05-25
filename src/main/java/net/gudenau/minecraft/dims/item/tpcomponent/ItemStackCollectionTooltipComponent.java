@@ -4,6 +4,8 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
@@ -15,6 +17,12 @@ import net.minecraft.item.ItemStack;
 
 import static net.minecraft.client.gui.tooltip.BundleTooltipComponent.TEXTURE;
 
+/**
+ * A generic tooltip component that renders a collection of items on hover.
+ *
+ * @since 0.0.1
+ */
+@Environment(EnvType.CLIENT)
 public final class ItemStackCollectionTooltipComponent implements TooltipComponent{
     private final List<ItemStack> stacks;
     

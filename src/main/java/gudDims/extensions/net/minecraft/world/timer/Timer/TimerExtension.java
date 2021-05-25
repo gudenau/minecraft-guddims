@@ -11,6 +11,14 @@ import net.minecraft.world.timer.TimerCallbackSerializer;
 
 @Extension
 public class TimerExtension {
+  /**
+   * Creates a Timer instance from an NBT tag
+   *
+   * @param list The tag to read
+   * @param serializer The serializer for the Timer
+   * @param <T> The type of Timer
+   * @return The read Timer
+   */
   @Extension
   public static <T> Timer<T> fromNbt(NbtList list, TimerCallbackSerializer<T> serializer) {
     var timer = new Timer<>(serializer);

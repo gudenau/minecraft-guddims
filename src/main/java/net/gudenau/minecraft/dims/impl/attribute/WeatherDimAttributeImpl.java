@@ -7,6 +7,11 @@ import net.minecraft.util.Identifier;
 
 import static net.gudenau.minecraft.dims.Dims.MOD_ID;
 
+/**
+ * The backing implementation to the weather attribute interface.
+ *
+ * @since 0.0.1
+ */
 public final class WeatherDimAttributeImpl implements WeatherDimAttribute{
     private final WeatherType type;
     private final Identifier id;

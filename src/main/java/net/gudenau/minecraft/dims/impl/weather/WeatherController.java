@@ -4,6 +4,11 @@ import java.util.Random;
 import net.gudenau.minecraft.dims.api.v0.attribute.WeatherDimAttribute;
 import net.minecraft.nbt.NbtCompound;
 
+/**
+ * Determines how the weather in a dimension will behave.
+ *
+ * @since 0.0.1
+ */
 public interface WeatherController{
     WeatherController CLEAR_WEATHER = new ClearWeather();
     WeatherController RAIN_WEATHER = new RainWeather();

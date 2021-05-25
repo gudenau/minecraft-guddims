@@ -16,9 +16,17 @@ import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
 
+/**
+ * A custom portal block that allows for intradimensional travel.
+ *
+ * @since 0.0.1
+ */
 public final class PortalBlock extends EntityBlock{
     private static final EnumProperty<Direction.Axis> AXIS = Properties.AXIS;
     
+    /**
+     * We want to make the portal skinny like vanilla ones after all.
+     */
     private static final VoxelShape[] SHAPES;
     static{
         SHAPES = new VoxelShape[Direction.Axis.values().length];
@@ -27,6 +35,9 @@ public final class PortalBlock extends EntityBlock{
         SHAPES[Direction.Axis.Z.ordinal()] = Block.createCuboidShape(0, 0, 7, 16, 16, 9);
     }
     
+    /**
+     * Used in creation and neighbor update logic.
+     */
     static final Direction[][] DIRECTIONS;
     static{
         DIRECTIONS = new Direction[3][4];
@@ -49,6 +60,12 @@ public final class PortalBlock extends EntityBlock{
         setDefaultState(getStateManager().getDefaultState().with(AXIS, Direction.Axis.X));
     }
     
+    /**
+     * Gets an array of directions that are the four neighboring blocks that "connect" to the provided state.
+     *
+     * @param portalState The state of the portal
+     * @return The direction array
+     */
     public static Direction[] getDirections(BlockState portalState){
         if(!portalState.isOf(Dims.Blocks.PORTAL)){
             throw new IllegalArgumentException("portalState is not a portal");
@@ -83,6 +100,7 @@ public final class PortalBlock extends EntityBlock{
             return;
         }
         
+        // Teleport the entity!
         var rawEntity = world.getBlockEntity(pos);
         if(rawEntity instanceof PortalBlockEntity){
             ((PortalBlockEntity)rawEntity).teleport(entity);
@@ -93,6 +111,7 @@ public final class PortalBlock extends EntityBlock{
     @Deprecated
     @Override
     public BlockState getStateForNeighborUpdate(BlockState state, Direction direction, BlockState neighborState, WorldAccess world, BlockPos pos, BlockPos neighborPos){
+        // Make sure the portal is still valid
         Direction.Axis dirAxis = direction.getAxis();
         Direction.Axis portalAxis = state.get(AXIS);
         if(dirAxis != portalAxis){

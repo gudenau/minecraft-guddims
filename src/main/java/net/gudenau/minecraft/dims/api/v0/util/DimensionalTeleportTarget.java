@@ -9,20 +9,53 @@ import net.minecraft.util.registry.RegistryKey;
 import net.minecraft.world.TeleportTarget;
 import net.minecraft.world.World;
 
+/**
+ * A basic cross-dimensional teleport target.
+ *
+ * @since 0.0.1
+ */
 public record DimensionalTeleportTarget(
     Vec3d position,
     float yaw,
     float pitch,
     RegistryKey<World> world
 ){
+    /**
+     * Creates a new teleport target with the provided position, yaw, pitch and world.
+     *
+     * This is the same as new DimensionTeleportTarget(pos, yaw, pitch, world.getRegistryKey())
+     *
+     * @param pos The destination position
+     * @param yaw The destination yaw
+     * @param pitch The destination pitch
+     * @param world The destination world
+     */
     public DimensionalTeleportTarget(Vec3d pos, float yaw, float pitch, World world){
         this(pos, yaw, pitch, world.getRegistryKey());
     }
     
+    /**
+     * Creates a new teleport target with the provided position, yaw, pitch and world identifier.
+     *
+     * This is the same as new DimensionTeleportTarget(pos, yaw, pitch, RegistryKey.of(Registry.WORLD_KEY, world))
+     *
+     * @param pos The destination position
+     * @param yaw The destination yaw
+     * @param pitch The destination pitch
+     * @param world The destination world identifier
+     */
     public DimensionalTeleportTarget(Vec3d pos, float yaw, float pitch, Identifier world){
         this(pos, yaw, pitch, RegistryKey.of(Registry.WORLD_KEY, world));
     }
     
+    /**
+     * Creates a vanilla teleportation target for use when actually teleporting an entity.
+     *
+     * TODO Make this redirect entity velocity
+     *
+     * @param entity The entity that is being teleported
+     * @return The teleport target
+     */
     public TeleportTarget toTeleportTarget(Entity entity){
         return new TeleportTarget(
             position,
@@ -31,6 +64,11 @@ public record DimensionalTeleportTarget(
         );
     }
     
+    /**
+     * Writes this target to a compound NBT tag.
+     *
+     * @return The created tag
+     */
     public NbtCompound toNbt(){
         var tag = new NbtCompound();
         tag.putDouble("x", position.x);
@@ -43,6 +81,12 @@ public record DimensionalTeleportTarget(
         return tag;
     }
     
+    /**
+     * Creates a dimensional teleport target from an NBT compound tag.
+     *
+     * @param tag The tag to read
+     * @return The deserialized target
+     */
     public static DimensionalTeleportTarget fromNbt(NbtCompound tag){
         return new DimensionalTeleportTarget(
             new Vec3d(
