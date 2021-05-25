@@ -140,6 +140,7 @@ public final class DimRegistryImpl implements DimRegistry{
                 worlds.put(info.getRegistryKey(), world);
                 ServerWorldEvents.LOAD.invoker().onWorldLoad(server, world);
             }
+            pendingDims.clear();
         }
     }
     
