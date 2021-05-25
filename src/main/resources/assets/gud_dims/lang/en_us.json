@@ -1,24 +1,49 @@
 {
   "biome_controller.gud_dims.single": "Single",
+  "biome_controller.gud_dims.checkerboard": "Checkerboard",
 
+  "block.gud_dims.anchor_minter": "Anchor Minter",
   "block.gud_dims.dimension_builder": "Dimension Builder",
+  "block.gud_dims.portal_receptacle": "Portal Receptacle",
+  "block.gud_dims.priscillite": "Priscillite",
+
+  "digit.gud_dims.digit0": "0",
+  "digit.gud_dims.digit1": "1",
+  "digit.gud_dims.digit2": "2",
+  "digit.gud_dims.digit3": "3",
+  "digit.gud_dims.digit4": "4",
+  "digit.gud_dims.digit5": "5",
+  "digit.gud_dims.digit6": "6",
+  "digit.gud_dims.digit7": "7",
+  "digit.gud_dims.digit8": "8",
+  "digit.gud_dims.digit9": "9",
 
   "item.gud_dims.dimension_anchor": "Dimension Anchor",
   "item.gud_dims.dimension_attribute": "Dimension Attribute",
   "item.gud_dims.dimension_token": "Dimension Token",
 
   "itemGroup.gud_dims.biomes": "Dimension Attributes: Biomes",
-  "itemGroup.gud_dims.biome_controllers": "Dimension Attributes: Biome Controllers",
   "itemGroup.gud_dims.blocks": "Dimension Attributes: Blocks",
   "itemGroup.gud_dims.colors": "Dimension Attributes: Colors",
+  "itemGroup.gud_dims.controllers": "Dimension Attributes: Controllers",
   "itemGroup.gud_dims.fluids": "Dimension Attributes: Fluids",
   "itemGroup.gud_dims.group": "gudDims",
+  "itemGroup.gud_dims.misc": "Dimension Attributes: Misc",
 
   "tooltip.gud_dims.type": "Attribute Type: ",
   "tooltip.gud_dims.type.biome": "Biome",
   "tooltip.gud_dims.type.biome_controller": "Biome Controller",
   "tooltip.gud_dims.type.block": "Block",
+  "tooltip.gud_dims.type.boolean": "Boolean",
   "tooltip.gud_dims.type.color": "Color",
+  "tooltip.gud_dims.type.digit": "Digit",
   "tooltip.gud_dims.type.fluid": "Fluid",
-  "tooltip.gud_dims.world": "World"
+  "tooltip.gud_dims.type.weather": "Weather",
+  "tooltip.gud_dims.world": "World",
+
+  "weather.gud_dims.normal": "Normal",
+  "weather.gud_dims.clear": "Clear",
+  "weather.gud_dims.rain": "Rain",
+  "weather.gud_dims.thunder": "Thunder",
+  "weather.gud_dims.accelerated": "Accelerated"
 }
