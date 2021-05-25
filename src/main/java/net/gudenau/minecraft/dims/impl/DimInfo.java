@@ -67,10 +67,10 @@ final class DimInfo{
         var attributeList = tag.getList("attributes", NbtType.COMPOUND);
         for(var element : attributeList){
             var attributeTag = (NbtCompound)element;
-            var type = DimAttributeType.get(attributeTag.getIdentifier("type"))
-                .orElseThrow(()->new RuntimeException("Unknown type: " + attributeTag.getIdentifier("type")));
-            attributes.add(registry.getAttribute(type, attributeTag.getIdentifier("attribute"))
-                .orElseThrow(()->new RuntimeException("Unknown attribute: " + attributeTag.getIdentifier("attribute"))));
+            var type = DimAttributeType.get(new Identifier(attributeTag.getString("type")))
+                .orElseThrow(()->new RuntimeException("Unknown type: " + attributeTag.getString("type")));
+            attributes.add(registry.getAttribute(type, new Identifier(attributeTag.getString("attribute")))
+                .orElseThrow(()->new RuntimeException("Unknown attribute: " + attributeTag.getString("attribute"))));
         }
         this.attributes = Collections.unmodifiableList(attributes);
         
@@ -172,7 +172,7 @@ final class DimInfo{
     private DimensionWorldProperties createWorldProperties(MinecraftServer server, Map<DimAttributeType, List<DimAttribute>> attributeMap){
         // ServerWorldProperties overworldProps, String name, WeatherController weatherController, DimensionGameRules gameRules
         
-        var weatherController = attributeMap.getOptional(DimAttributeType.WEATHER)
+        var weatherController = Optional.ofNullable(attributeMap.get(DimAttributeType.WEATHER))
             .map((attributes)->((WeatherDimAttribute)attributes.get(0)).getWeather())
             //TODO Make this the world random you lazy idiot
             .map((type)->WeatherController.create(new Random(), type))
@@ -289,8 +289,8 @@ final class DimInfo{
         var attributeList = new NbtList();
         for(DimAttribute attribute : attributes){
             var compound = new NbtCompound();
-            compound.putIdentifier("type", attribute.getType().getId());
-            compound.putIdentifier("attribute", attribute.getId());
+            compound.putString("type", attribute.getType().getId().toString());
+            compound.putString("attribute", attribute.getId().toString());
             attributeList.add(compound);
         }
         tag.put("attributes", attributeList);

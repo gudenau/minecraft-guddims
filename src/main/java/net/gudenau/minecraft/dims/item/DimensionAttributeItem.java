@@ -13,6 +13,7 @@ import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.world.World;
@@ -62,8 +63,8 @@ public final class DimensionAttributeItem extends Item{
             return Optional.empty();
         }
         
-        return DimAttributeType.get(tag.getIdentifier("AttributeKind"))
-            .flatMap(type->DimRegistry.getInstance().getAttribute(type, tag.getIdentifier("Attribute")));
+        return DimAttributeType.get(new Identifier(tag.getString("AttributeKind")))
+            .flatMap(type->DimRegistry.getInstance().getAttribute(type, new Identifier(tag.getString("Attribute"))));
     }
     
     /**
@@ -84,8 +85,8 @@ public final class DimensionAttributeItem extends Item{
             case WEATHER -> Dims.Items.DIMENSION_ATTRIBUTE_WEATHER;
         });
         var tag = stack.getOrCreateTag();
-        tag.putIdentifier("AttributeKind", attribute.getType().getId());
-        tag.putIdentifier("Attribute", attribute.getId());
+        tag.putString("AttributeKind", attribute.getType().getId().toString());
+        tag.putString("Attribute", attribute.getId().toString());
         return stack;
     }
     

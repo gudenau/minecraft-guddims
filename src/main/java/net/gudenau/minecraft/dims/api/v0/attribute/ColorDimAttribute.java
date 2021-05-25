@@ -1,5 +1,6 @@
 package net.gudenau.minecraft.dims.api.v0.attribute;
 
+import net.gudenau.minecraft.dims.util.MiscStuff;
 import net.minecraft.util.DyeColor;
 
 /**
@@ -21,7 +22,7 @@ public interface ColorDimAttribute extends DimAttribute{
      * @return The associated color value
      */
     default int getColorValue(){
-        return getColor().getColor();
+        return MiscStuff.getDyeColor(getColor());
     }
     
     @Override

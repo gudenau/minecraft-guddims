@@ -46,7 +46,7 @@ public final class PortalReceptacleBlockEntity extends BlockEntity{
     public NbtCompound writeNbt(NbtCompound tag){
         tag = super.writeNbt(tag);
         
-        tag.putStack("anchor", anchor);
+        tag.put("anchor", anchor.writeNbt(new NbtCompound()));
         if(target != null){
             tag.put("target", target.toNbt());
         }
@@ -58,7 +58,7 @@ public final class PortalReceptacleBlockEntity extends BlockEntity{
     public void readNbt(NbtCompound tag){
         super.readNbt(tag);
         
-        anchor = tag.getStack("anchor");
+        anchor = ItemStack.fromNbt(tag.getCompound("anchor"));
         if(tag.contains("target", NbtType.COMPOUND)){
             target = DimensionalTeleportTarget.fromNbt(tag.getCompound("target"));
         }else{

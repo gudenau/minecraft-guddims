@@ -13,19 +13,6 @@ dependencies {
 	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
-
-	implementation include("systems.manifold:manifold-ext-rt:${project.manifold_version}")
-	annotationProcessor "systems.manifold:manifold-ext:${project.manifold_version}"
-}
-
-if (JavaVersion.current() != JavaVersion.VERSION_1_8 && sourceSets.main.allJava.files.any {it.name == "module-info.java"}) {
-	tasks.withType(JavaCompile) {
-		options.compilerArgs += ['-Xplugin:Manifold', '--module-path', it.classpath.asPath]
-	}
-} else {
-	tasks.withType(JavaCompile) {
-		options.compilerArgs += ['-Xplugin:Manifold']
-	}
 }
 
 processResources {

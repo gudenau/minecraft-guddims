@@ -6,16 +6,16 @@ import net.fabricmc.fabric.api.util.NbtType;
 import net.gudenau.minecraft.dims.Dims;
 import net.gudenau.minecraft.dims.api.v0.util.DimensionalTeleportTarget;
 import net.gudenau.minecraft.dims.block.entity.PortalBlockEntity;
+import net.gudenau.minecraft.dims.util.MiscStuff;
 import net.minecraft.client.item.TooltipContext;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.*;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
-import net.minecraft.util.*;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.registry.Registry;
-import net.minecraft.util.registry.RegistryKey;
+import net.minecraft.util.ActionResult;
+import net.minecraft.util.Hand;
+import net.minecraft.util.TypedActionResult;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
@@ -82,7 +82,7 @@ public final class DimensionAnchorItem extends Item{
         // Teleport the user if we have a target
         if(targetOptional.isPresent()){
             if(user.isCreative()){
-                user.teleportToTarget(targetOptional.get());
+                MiscStuff.teleportEntity(user, targetOptional.get());
             }else{
                 // Consume a pearl
                 var inventory = user.getInventory();
@@ -90,7 +90,7 @@ public final class DimensionAnchorItem extends Item{
                 if(slot != -1){
                     inventory.getStack(slot).decrement(1);
                     user.damage(DamageSource.FALL, 5.0F);
-                    user.teleportToTarget(targetOptional.get());
+                    MiscStuff.teleportEntity(user, targetOptional.get());
                 }
             }
         }else{

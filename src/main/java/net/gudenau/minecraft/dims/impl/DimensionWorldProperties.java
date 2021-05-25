@@ -1,10 +1,10 @@
 package net.gudenau.minecraft.dims.impl;
 
-import gudDims.extensions.net.minecraft.world.border.WorldBorder.Properties.WorldBorder$PropertiesExtension;
 import java.util.Random;
 import java.util.UUID;
 import net.fabricmc.fabric.api.util.NbtType;
 import net.gudenau.minecraft.dims.impl.weather.WeatherController;
+import net.gudenau.minecraft.dims.util.MiscStuff;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.*;
@@ -66,9 +66,8 @@ public final class DimensionWorldProperties implements ServerWorldProperties{
             name,
             WeatherController.fromNbt(new Random() /* TODO Make this the world random you lazy idiot */, compound.getCompound("weather")),
             DimensionGameRules.fromNbt(compound.getCompound("rules"), parentRules),
-            // Why?
-            WorldBorder$PropertiesExtension.fromNbt(compound.getCompound("border")),
-            Timer.fromNbt(compound.getList("timer", NbtType.COMPOUND), TimerCallbackSerializer.INSTANCE)
+            MiscStuff.worldBorderFromNbt(compound.getCompound("border")),
+            MiscStuff.timerFromNbt(compound.getList("timer", NbtType.COMPOUND), TimerCallbackSerializer.INSTANCE)
         );
     
         props.setTime(compound.getLong("time"));
@@ -90,7 +89,7 @@ public final class DimensionWorldProperties implements ServerWorldProperties{
         var compound = new NbtCompound();
         compound.put("weather", weatherController.toNbt());
         compound.put("rules", gameRules.toNbt());
-        compound.put("border", /* Why */ WorldBorder$PropertiesExtension.toNbt(worldBorder));
+        compound.put("border", MiscStuff.worldBorderToNbt(worldBorder));
         compound.put("timer", timer.toNbt());
         compound.putLong("time", time);
         compound.putLong("timeOfDay", timeOfDay);

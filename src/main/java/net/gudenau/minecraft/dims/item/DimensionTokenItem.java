@@ -16,6 +16,7 @@ import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.util.registry.RegistryKey;
 import net.minecraft.world.World;
@@ -58,7 +59,7 @@ public final class DimensionTokenItem extends Item{
             return Optional.empty();
         }
         
-        return Optional.of(RegistryKey.of(Registry.WORLD_KEY, tag.getIdentifier("world")));
+        return Optional.of(RegistryKey.of(Registry.WORLD_KEY, new Identifier(tag.getString("world"))));
     }
     
     /**
@@ -80,9 +81,9 @@ public final class DimensionTokenItem extends Item{
         var list = new ArrayList<DimAttribute>();
         for(NbtElement element : tag.getList("attributes", NbtType.COMPOUND)){
             var compound = (NbtCompound)element;
-            var type = DimAttributeType.get(compound.getIdentifier("type"));
+            var type = DimAttributeType.get(new Identifier(tag.getString("type")));
             var attribute = type.flatMap((value)->
-                registry.getAttribute(value, compound.getIdentifier("attribute"))
+                registry.getAttribute(value, new Identifier(compound.getString("attribute")))
             );
             if(attribute.isEmpty()){
                 return Optional.empty();
@@ -104,12 +105,12 @@ public final class DimensionTokenItem extends Item{
     public static ItemStack createToken(RegistryKey<World> world, List<DimAttribute> attributes){
         ItemStack stack = new ItemStack(Dims.Items.DIMENSION_TOKEN);
         var tag = stack.getOrCreateTag();
-        tag.putIdentifier("world", world.getValue());
+        tag.putString("world", world.getValue().toString());
         var attributeList = new NbtList();
         for(var attribute : attributes){
             var attributeTag = new NbtCompound();
-            attributeTag.putIdentifier("type", attribute.getType().getId());
-            attributeTag.putIdentifier("attribute", attribute.getId());
+            attributeTag.putString("type", attribute.getType().getId().toString());
+            attributeTag.putString("attribute", attribute.getId().toString());
             attributeList.add(attributeTag);
         }
         tag.put("attributes", attributeList);
