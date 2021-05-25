@@ -147,7 +147,7 @@ public final class Dims implements ModInitializer{
         
         public static final Item DIMENSION_ATTRIBUTE_BIOME = new DimensionAttributeItem(DimAttributeType.BIOME, new FabricItemSettings().group(BIOME_GROUP));
         public static final Item DIMENSION_ATTRIBUTE_BIOME_CONTROLLER = new DimensionAttributeItem(DimAttributeType.BIOME_CONTROLLER, new FabricItemSettings().group(CONTROLLER_GROUP));
-        public static final Item DIMENSION_ATTRIBUTE_BOOLEAN = new DimensionAttributeItem(DimAttributeType.DIGIT, new FabricItemSettings().group(MISC_GROUP));
+        public static final Item DIMENSION_ATTRIBUTE_BOOLEAN = new DimensionAttributeItem(DimAttributeType.BOOLEAN, new FabricItemSettings().group(MISC_GROUP));
         public static final Item DIMENSION_ATTRIBUTE_BLOCK = new DimensionAttributeItem(DimAttributeType.BLOCK, new FabricItemSettings().group(BLOCK_GROUP));
         public static final Item DIMENSION_ATTRIBUTE_COLOR = new DimensionAttributeItem(DimAttributeType.COLOR, new FabricItemSettings().group(MISC_GROUP));
         public static final Item DIMENSION_ATTRIBUTE_DIGIT = new DimensionAttributeItem(DimAttributeType.DIGIT, new FabricItemSettings().group(MISC_GROUP));
