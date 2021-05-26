@@ -10,6 +10,8 @@
     "WorldBorder$PropertiesAccessor"
   ],
   "client": [
+    "client.NativeImageAccessor",
+    "client.SpriteAccessor"
   ],
   "injectors": {
     "defaultRequire": 1

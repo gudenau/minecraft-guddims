@@ -3,10 +3,15 @@ package net.gudenau.minecraft.dims.util;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMaps;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
+import java.nio.IntBuffer;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.gudenau.minecraft.dims.accessor.TimerAccessor;
 import net.gudenau.minecraft.dims.accessor.WorldBorder$PropertiesAccessor;
+import net.gudenau.minecraft.dims.accessor.client.NativeImageAccessor;
 import net.gudenau.minecraft.dims.api.v0.util.DimensionalTeleportTarget;
 import net.gudenau.minecraft.dims.duck.EntityDuck;
+import net.minecraft.client.texture.NativeImage;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
@@ -17,6 +22,7 @@ import net.minecraft.util.DyeColor;
 import net.minecraft.world.border.WorldBorder;
 import net.minecraft.world.timer.Timer;
 import net.minecraft.world.timer.TimerCallbackSerializer;
+import org.lwjgl.system.MemoryUtil;
 
 public final class MiscStuff{
     private MiscStuff(){}
@@ -114,5 +120,14 @@ public final class MiscStuff{
             tag.getLong("sizeLerpTime"),
             tag.getDouble("sizeLerpTarget")
         );
+    }
+    
+    @Environment(EnvType.CLIENT)
+    public static IntBuffer getImagePixels(NativeImage image){
+        @SuppressWarnings("ConstantConditions")
+        var accessor = (NativeImageAccessor)(Object)image;
+        var pointer = accessor.getPointer();
+        var sizeBytes = accessor.getSizeBytes();
+        return MemoryUtil.memIntBufferSafe(pointer, (int)sizeBytes);
     }
 }

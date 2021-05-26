@@ -6,7 +6,8 @@
   "mixins": [
     "EntityMixin",
     "MinecraftServerMixin",
-    "ServerPlayerEntityMixin"
+    "ServerPlayerEntityMixin",
+    "client.ResourceReloadLoggerMixin"
   ],
   "client": [
     "client.TooltipComponentMixin"
