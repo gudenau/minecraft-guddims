@@ -1,5 +1,7 @@
 package net.gudenau.minecraft.dims.api.v0.util;
 
+import java.util.Objects;
+import net.gudenau.minecraft.dims.api.v0.util.collection.ObjectIntPair;
 import net.minecraft.entity.Entity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.util.Identifier;
@@ -31,7 +33,7 @@ public record DimensionalTeleportTarget(
      * @param world The destination world
      */
     public DimensionalTeleportTarget(Vec3d pos, float yaw, float pitch, World world){
-        this(pos, yaw, pitch, world.getRegistryKey());
+        this(pos, yaw, pitch, Objects.requireNonNull(world, "world was null").getRegistryKey());
     }
     
     /**
@@ -45,7 +47,14 @@ public record DimensionalTeleportTarget(
      * @param world The destination world identifier
      */
     public DimensionalTeleportTarget(Vec3d pos, float yaw, float pitch, Identifier world){
-        this(pos, yaw, pitch, RegistryKey.of(Registry.WORLD_KEY, world));
+        this(pos, yaw, pitch, RegistryKey.of(Registry.WORLD_KEY, Objects.requireNonNull(world, "world was null")));
+    }
+    
+    public DimensionalTeleportTarget(Vec3d position, float yaw, float pitch, RegistryKey<World> world){
+        this.position = Objects.requireNonNull(position, "position was null");
+        this.yaw = yaw;
+        this.pitch = pitch;
+        this.world = Objects.requireNonNull(world, "world was null");
     }
     
     /**

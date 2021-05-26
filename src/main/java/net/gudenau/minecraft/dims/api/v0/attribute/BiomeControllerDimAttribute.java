@@ -1,5 +1,6 @@
 package net.gudenau.minecraft.dims.api.v0.attribute;
 
+import net.gudenau.minecraft.dims.api.v0.controller.BiomeDimController;
 import net.gudenau.minecraft.dims.api.v0.util.IntRange;
 import net.minecraft.util.Identifier;
 
@@ -17,51 +18,10 @@ public interface BiomeControllerDimAttribute extends ControllerDimAttribute{
      *
      * @return The controller type
      */
-    ControllerType getController();
+    BiomeDimController getController();
     
     @Override
     default DimAttributeType getType(){
         return DimAttributeType.BIOME_CONTROLLER;
-    }
-    
-    /**
-     * The types of biome controllers.
-     *
-     * TODO, make this extendable before release
-     *
-     * @since 0.0.1
-     */
-    enum ControllerType{
-        /**
-         * A single biome
-         */
-        SINGLE("single", IntRange.of(1)),
-        /**
-         * Two biomes that alternate every chunk.
-         */
-        CHECKERBOARD("checkerboard", IntRange.of(2));
-        
-        private final Identifier id;
-        private final IntRange biomeCountRange;
-    
-        ControllerType(String name, IntRange biomeCountRange){
-            id = new Identifier(MOD_ID, name);
-            this.biomeCountRange = biomeCountRange;
-        }
-    
-        public Identifier getId(){
-            return id;
-        }
-    
-        /**
-         * Gets the range of acceptable biome types for this controller.
-         *
-         * TODO examples of ranges
-         *
-         * @return The range of values
-         */
-        public IntRange getBiomeCountRange(){
-            return biomeCountRange;
-        }
     }
 }

@@ -1,15 +1,15 @@
 package net.gudenau.minecraft.dims.api.v0;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import net.gudenau.minecraft.dims.api.v0.attribute.DimAttribute;
 import net.gudenau.minecraft.dims.api.v0.attribute.DimAttributeType;
+import net.gudenau.minecraft.dims.api.v0.controller.DimController;
 import net.gudenau.minecraft.dims.impl.DimRegistryImpl;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.RegistryKey;
 import net.minecraft.world.World;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * A centralized place to interact with this mod. It provides information about dimensions, dimension attributes as well
@@ -127,4 +127,15 @@ public interface DimRegistry{
      * @return The random attribute
      */
     DimAttribute getRandomAttribute(DimAttributeType... types);
+    
+    /**
+     * Registers a collection of dimension controllers.
+     *
+     * @param controllers The controllers to register
+     */
+    default void registerControllers(Collection<@NotNull DimController<?>> controllers){
+        controllers.forEach(this::registerController);
+    }
+    
+    void registerController(DimController<?> controller);
 }

@@ -11,6 +11,7 @@ import net.fabricmc.fabric.api.util.NbtType;
 import net.gudenau.minecraft.dims.accessor.MinecraftServerAccessor;
 import net.gudenau.minecraft.dims.api.v0.DimRegistry;
 import net.gudenau.minecraft.dims.api.v0.attribute.*;
+import net.gudenau.minecraft.dims.api.v0.util.collection.ObjectIntPair;
 import net.gudenau.minecraft.dims.impl.weather.WeatherController;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtList;
@@ -43,6 +44,7 @@ import static net.gudenau.minecraft.dims.Dims.MOD_ID;
  */
 final class DimInfo{
     private static final DimRegistry registry = DimRegistry.getInstance();
+    private static final Random RANDOM = new Random(System.nanoTime() ^ 0xDEADC0DEDEADBEEFL);
     
     private final UUID uuid;
     private final String name;
@@ -150,9 +152,13 @@ final class DimInfo{
             // Record the controller and it's attributes
             attributeMap.put(type, appliedAttributes);
         }
+    
+        long instability = garbage.size();
         
         // And create the dimension stuff
-        biomeSource = createBiomeSource(attributeMap.get(DimAttributeType.BIOME_CONTROLLER));
+        var biomeSourcePair = createBiomeSource(attributeMap.get(DimAttributeType.BIOME_CONTROLLER));
+        biomeSource = biomeSourcePair.object();
+        instability += biomeSourcePair.integer();
         worldProps = createWorldProperties(server, attributeMap);
     }
     
@@ -188,7 +194,7 @@ final class DimInfo{
      * @param attributes The attributes to parse
      * @return The biome source from the attributes
      */
-    private BiomeSource createBiomeSource(@Nullable List<DimAttribute> attributes){
+    private ObjectIntPair<BiomeSource> createBiomeSource(@Nullable List<DimAttribute> attributes){
         // Well we need to make everything up if not supplied
         if(attributes == null){
             attributes = new ArrayList<>();
@@ -196,25 +202,20 @@ final class DimInfo{
             BiomeControllerDimAttribute controller = registry.getRandomAttribute(DimAttributeType.BIOME_CONTROLLER);
             attributes.add(controller);
         }
-        if(attributes.size() == 1){
-            // TODO Make controller attributes able to provide reasonable defaults
-            switch(((BiomeControllerDimAttribute)attributes.get(0)).getController()){
-                case SINGLE -> attributes.add(registry.getRandomAttribute(DimAttributeType.BIOME));
-                case CHECKERBOARD -> {
-                    attributes.add(registry.getRandomAttribute(DimAttributeType.BIOME));
-                    attributes.add(registry.getRandomAttribute(DimAttributeType.BIOME));
-                }
-            }
+        
+        var controller = ((BiomeControllerDimAttribute)attributes.remove(0)).getController();
+        List<Biome> biomeList;
+        if(attributes.size() == 0){
+            biomeList = controller.generateBiomeList(RANDOM);
+        }else{
+            biomeList = attributes.stream()
+                .map((attribute)->(BiomeDimAttribute)attribute)
+                .map(BiomeDimAttribute::getBiome)
+                .collect(Collectors.toList());
         }
         
-        var controller = (BiomeControllerDimAttribute)attributes.remove(0);
-        var biomeRange = controller.getController().getBiomeCountRange();
-        // Get the biomes the attributes want
-        var biomeList = attributes.stream()
-            .map((attribute)->(BiomeDimAttribute)attribute)
-            .map(BiomeDimAttribute::getBiome)
-            .collect(Collectors.toList());
-        
+        var biomeRange = controller.getValidBiomeCount();
+
         // TODO Penalize removing and adding biomes at this stage
         // Make sure their are just the right amount of biomes
         while(biomeRange.isOver(biomeList.size())){
@@ -224,14 +225,7 @@ final class DimInfo{
             biomeList.remove(biomeList.size() - 1);
         }
         
-        return switch(controller.getController()){
-            case SINGLE -> new FixedBiomeSource(biomeList.get(0));
-            // Thanks Mojank
-            case CHECKERBOARD -> new CheckerboardBiomeSource(
-                biomeList.stream().map((biome)->(Supplier<Biome>)()->biome).collect(Collectors.toList()),
-                2
-            );
-        };
+        return controller.createBiomeSource(biomeList);
     }
     
     /**

@@ -61,4 +61,15 @@ public final record IntRange(int lower, int upper){
     public boolean isOver(int value){
         return value > upper;
     }
+    
+    /**
+     * Gets the count of valid values in this range.
+     *
+     * @since 0.0.3
+     *
+     * @return The count of valid values
+     */
+    public int size(){
+        return upper - lower;
+    }
 }

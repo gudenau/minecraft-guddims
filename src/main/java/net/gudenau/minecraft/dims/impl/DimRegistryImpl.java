@@ -18,6 +18,8 @@ import net.gudenau.minecraft.dims.accessor.LevelStorage$SessionAccessor;
 import net.gudenau.minecraft.dims.accessor.MinecraftServerAccessor;
 import net.gudenau.minecraft.dims.api.v0.*;
 import net.gudenau.minecraft.dims.api.v0.attribute.*;
+import net.gudenau.minecraft.dims.api.v0.controller.BiomeDimController;
+import net.gudenau.minecraft.dims.api.v0.controller.DimController;
 import net.gudenau.minecraft.dims.impl.attribute.*;
 import net.minecraft.block.Blocks;
 import net.minecraft.item.AirBlockItem;
@@ -32,6 +34,7 @@ import net.minecraft.util.Language;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.util.registry.RegistryKey;
 import net.minecraft.world.World;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * The implementation of the registry.
@@ -58,8 +61,8 @@ public final class DimRegistryImpl implements DimRegistry{
     private List<BiomeDimAttribute> biomeAttributeList;
     private Map<Identifier, BiomeDimAttribute> biomeAttributeMap;
     
-    private List<BiomeControllerDimAttribute> biomeControllerAttributeList;
-    private Map<Identifier, BiomeControllerDimAttribute> biomeControllerAttributeMap;
+    private final List<BiomeControllerDimAttribute> biomeControllerAttributeList = new ArrayList<>();
+    private final Map<Identifier, BiomeControllerDimAttribute> biomeControllerAttributeMap = new HashMap<>();
     
     private List<DigitDimAttribute> digitDimAttributeList;
     private Map<Identifier, DigitDimAttribute> digitDimAttributeMap;
@@ -81,7 +84,7 @@ public final class DimRegistryImpl implements DimRegistry{
             case FLUID -> fluidAttributeList;
             case COLOR -> colorAttributeList;
             case BIOME -> biomeAttributeList;
-            case BIOME_CONTROLLER -> biomeControllerAttributeList;
+            case BIOME_CONTROLLER -> Collections.unmodifiableList(biomeControllerAttributeList);
             case DIGIT -> digitDimAttributeList;
             case BOOLEAN -> booleanDimAttributeList;
             case WEATHER -> weatherDimAttributeList;
@@ -107,7 +110,7 @@ public final class DimRegistryImpl implements DimRegistry{
             case FLUID -> fluidAttributeMap;
             case COLOR -> colorAttributeMap;
             case BIOME -> biomeAttributeMap;
-            case BIOME_CONTROLLER -> biomeControllerAttributeMap;
+            case BIOME_CONTROLLER -> Collections.unmodifiableMap(biomeControllerAttributeMap);
             case DIGIT -> digitDimAttributeMap;
             case BOOLEAN -> booleanDimAttributeMap;
             case WEATHER -> weatherDimAttributeMap;
@@ -188,6 +191,20 @@ public final class DimRegistryImpl implements DimRegistry{
             finalIndex,
             Stream.of(types).map((type)->type.getId().toString()).collect(Collectors.joining(", "))
         ));
+    }
+    
+    @Override
+    public void registerController(DimController<?> controller){
+        switch(controller.getType()){
+            case BIOME -> {
+                var attribute = new BiomeControllerDimAttributeImpl((BiomeDimController)controller);
+                if(biomeControllerAttributeMap.putIfAbsent(attribute.getId(), attribute) != null){
+                    throw new IllegalStateException("Biome controller " + attribute.getId() + " was already registered");
+                }
+                biomeControllerAttributeList.add(attribute);
+            }
+            case WEATHER -> throw new UnsupportedOperationException("TODO");//TODO
+        }
     }
     
     public void init(MinecraftServer server){
@@ -312,13 +329,6 @@ public final class DimRegistryImpl implements DimRegistry{
             .map((attribute)->(ColorDimAttribute)attribute)
             .toList();
         colorAttributeMap = toMap(colorAttributeList);
-    
-        biomeControllerAttributeList = Stream.of(BiomeControllerDimAttribute.ControllerType.values())
-            .map(BiomeControllerDimAttributeImpl::new)
-            .sorted(Comparator.comparing(DimAttribute::getId))
-            .map((attribute)->(BiomeControllerDimAttribute)attribute)
-            .toList();
-        biomeControllerAttributeMap = toMap(biomeControllerAttributeList);
     
         digitDimAttributeList = IntStream.range(0, 10)
             .mapToObj(DigitDimAttributeImpl::new)

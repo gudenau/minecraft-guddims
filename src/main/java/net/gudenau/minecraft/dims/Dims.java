@@ -1,5 +1,6 @@
 package net.gudenau.minecraft.dims;
 
+import java.util.Collections;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.client.itemgroup.FabricItemGroupBuilder;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
@@ -8,13 +9,16 @@ import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
 import net.fabricmc.fabric.api.object.builder.v1.block.FabricBlockSettings;
 import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder;
 import net.fabricmc.fabric.api.tag.TagRegistry;
+import net.fabricmc.loader.api.FabricLoader;
 import net.gudenau.minecraft.dims.api.v0.DimRegistry;
+import net.gudenau.minecraft.dims.api.v0.DimsInitializer;
 import net.gudenau.minecraft.dims.api.v0.attribute.DimAttributeType;
 import net.gudenau.minecraft.dims.block.*;
 import net.gudenau.minecraft.dims.block.entity.DimensionBuilderBlockEntity;
 import net.gudenau.minecraft.dims.block.entity.PortalBlockEntity;
 import net.gudenau.minecraft.dims.block.entity.PortalReceptacleBlockEntity;
 import net.gudenau.minecraft.dims.impl.DimRegistryImpl;
+import net.gudenau.minecraft.dims.impl.controller.DefaultControllers;
 import net.gudenau.minecraft.dims.item.DimensionAnchorItem;
 import net.gudenau.minecraft.dims.item.DimensionAttributeItem;
 import net.gudenau.minecraft.dims.item.DimensionTokenItem;
@@ -36,7 +40,7 @@ import net.minecraft.util.registry.Registry;
  *
  * @since 0.0.1
  */
-public final class Dims implements ModInitializer{
+public final class Dims implements ModInitializer, DimsInitializer{
     public static final String MOD_ID = "gud_dims";
     
     @Override
@@ -44,7 +48,37 @@ public final class Dims implements ModInitializer{
         Blocks.init();
         Items.init();
         Tags.init();
+        initServerEventHandlers();
+        initAddons();
+    }
     
+    @Override
+    public void initDims(DimRegistry registry){
+        registry.registerControllers(DefaultControllers.createControllers());
+    }
+    
+    private void initAddons(){
+        var entryPoints = FabricLoader.getInstance().getEntrypointContainers(MOD_ID, DimsInitializer.class);
+        // Make every other mod that has an entry point have a random order. We do it this way because people can be
+        // silly and to make sure the API doesn't break too hard during development
+        var ourEntry = entryPoints.stream()
+            .filter((entry)->entry.getEntrypoint().getClass() == Dims.class)
+            .findAny().orElseThrow(()->new RuntimeException("Failed to find our own init callback"));
+        entryPoints.remove(ourEntry);
+        Collections.shuffle(entryPoints);
+        entryPoints.add(0, ourEntry);
+        
+        var registry = DimRegistry.getInstance();
+        for(var entry : entryPoints){
+            try{
+                entry.getEntrypoint().initDims(registry);
+            }catch(Throwable t){
+                throw new RuntimeException("Failed to init mod \"" + entry.getProvider().getMetadata().getName() + "\"'s entry point", t);
+            }
+        }
+    }
+    
+    private void initServerEventHandlers(){
         ServerLifecycleEvents.SERVER_STARTING.register(DimRegistryImpl.INSTANCE::init);
         ServerLifecycleEvents.SERVER_STARTED.register(DimRegistryImpl.INSTANCE::createWorlds);
         ServerLifecycleEvents.SERVER_STOPPED.register((server)->{

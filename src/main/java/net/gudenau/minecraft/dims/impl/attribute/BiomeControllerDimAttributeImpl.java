@@ -3,6 +3,7 @@ package net.gudenau.minecraft.dims.impl.attribute;
 import net.gudenau.minecraft.dims.api.v0.attribute.BiomeControllerDimAttribute;
 import net.gudenau.minecraft.dims.api.v0.attribute.DimAttribute;
 import net.gudenau.minecraft.dims.api.v0.attribute.DimAttributeType;
+import net.gudenau.minecraft.dims.api.v0.controller.BiomeDimController;
 import net.minecraft.util.Identifier;
 
 /**
@@ -11,20 +12,20 @@ import net.minecraft.util.Identifier;
  * @since 0.0.1
  */
 public final class BiomeControllerDimAttributeImpl implements BiomeControllerDimAttribute{
-    private final ControllerType controllerType;
+    private final BiomeDimController controller;
     
-    public BiomeControllerDimAttributeImpl(ControllerType controllerType){
-        this.controllerType = controllerType;
+    public BiomeControllerDimAttributeImpl(BiomeDimController controller){
+        this.controller = controller;
     }
     
     @Override
-    public ControllerType getController(){
-        return controllerType;
+    public BiomeDimController getController(){
+        return controller;
     }
     
     @Override
     public Identifier getId(){
-        return controllerType.getId();
+        return controller.getId();
     }
     
     @Override
