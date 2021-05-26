@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableMap;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collector;
-import java.util.stream.Collectors;
 import net.fabricmc.fabric.api.util.NbtType;
 import net.fabricmc.fabric.mixin.gamerule.GameRulesAccessor;
 import net.minecraft.nbt.NbtCompound;

@@ -12,7 +12,6 @@ import net.gudenau.minecraft.dims.util.TripleInt;
 import net.minecraft.block.Block;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.model.BakedQuad;
-import net.minecraft.client.texture.SpriteAtlasTexture;
 import net.minecraft.util.math.Direction;
 
 @Environment(EnvType.CLIENT)

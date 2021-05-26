@@ -7,8 +7,6 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
 import net.fabricmc.fabric.api.object.builder.v1.block.FabricBlockSettings;
 import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder;
-import net.fabricmc.fabric.api.tag.FabricTag;
-import net.fabricmc.fabric.api.tag.FabricTagBuilder;
 import net.fabricmc.fabric.api.tag.TagRegistry;
 import net.gudenau.minecraft.dims.api.v0.DimRegistry;
 import net.gudenau.minecraft.dims.api.v0.attribute.DimAttributeType;
@@ -48,10 +46,7 @@ public final class Dims implements ModInitializer{
         Tags.init();
     
         ServerLifecycleEvents.SERVER_STARTING.register(DimRegistryImpl.INSTANCE::init);
-        ServerLifecycleEvents.SERVER_STARTED.register((server)->{
-            DimRegistryImpl.INSTANCE.createWorlds(server);
-            //DimRegistryImpl.INSTANCE.tickWorls(server);
-        });
+        ServerLifecycleEvents.SERVER_STARTED.register(DimRegistryImpl.INSTANCE::createWorlds);
         ServerLifecycleEvents.SERVER_STOPPED.register((server)->{
             try{
                 DimRegistryImpl.INSTANCE.saveWorlds(server);

@@ -38,7 +38,6 @@ import net.minecraft.world.World;
  *
  * @since 0.0.1
  */
-@SuppressWarnings("SimplifyStreamApiCallChains")
 public final class DimRegistryImpl implements DimRegistry{
     public static final DimRegistryImpl INSTANCE = new DimRegistryImpl();
     private static final Random random = new Random(System.nanoTime() ^ 0xDEADBEEFCAFEBABEL);
@@ -96,7 +95,7 @@ public final class DimRegistryImpl implements DimRegistry{
             .map(this::getAttributes)
             .flatMap(List::stream)
             .distinct()
-            .collect(Collectors.toUnmodifiableList());
+            .toList();
     }
     
     @SuppressWarnings("unchecked")
@@ -228,8 +227,8 @@ public final class DimRegistryImpl implements DimRegistry{
     
         var biomeRegistry = registryManager.getMutable(Registry.BIOME_KEY);
         biomeAttributeList = biomeRegistry.stream()
-            .map((biome)->new BiomeDimAttributeImpl(biome, biomeRegistry.getId(biome)))
-            .collect(Collectors.toUnmodifiableList());
+            .map((biome)->(BiomeDimAttribute)new BiomeDimAttributeImpl(biome, biomeRegistry.getId(biome)))
+            .toList();
         biomeAttributeMap = toMap(biomeAttributeList);
     }
     
@@ -293,30 +292,39 @@ public final class DimRegistryImpl implements DimRegistry{
                 var id = attribute.getId();
                 return language.hasTranslation("block." + id.getNamespace() + "." + id.getPath());
             })
-            .sorted(Comparator.comparing(BlockDimAttributeImpl::getId))
-            .collect(Collectors.toUnmodifiableList());
+            .sorted(Comparator.comparing(DimAttribute::getId))
+            .map((attribute)->(BlockDimAttribute)attribute)
+            .toList();
         blockAttributeMap = toMap(blockAttributeList);
         
         fluidAttributeList = Registry.FLUID.stream()
             .filter((fluid)->fluid.getDefaultState().isStill())
             .distinct()
             .map((fluid)->new FluidDimAttributeImpl(fluid, Registry.FLUID.getId(fluid)))
-            .collect(Collectors.toUnmodifiableList());
+            .sorted(Comparator.comparing(DimAttribute::getId))
+            .map((attribute)->(FluidDimAttribute)attribute)
+            .toList();
         fluidAttributeMap = toMap(fluidAttributeList);
         
         colorAttributeList = Stream.of(DyeColor.values())
             .map((color)->new ColorDimAttributeImpl(color, new Identifier("minecraft", color.getName())))
-            .collect(Collectors.toUnmodifiableList());
+            .sorted(Comparator.comparing(DimAttribute::getId))
+            .map((attribute)->(ColorDimAttribute)attribute)
+            .toList();
         colorAttributeMap = toMap(colorAttributeList);
     
         biomeControllerAttributeList = Stream.of(BiomeControllerDimAttribute.ControllerType.values())
             .map(BiomeControllerDimAttributeImpl::new)
-            .collect(Collectors.toUnmodifiableList());
+            .sorted(Comparator.comparing(DimAttribute::getId))
+            .map((attribute)->(BiomeControllerDimAttribute)attribute)
+            .toList();
         biomeControllerAttributeMap = toMap(biomeControllerAttributeList);
     
         digitDimAttributeList = IntStream.range(0, 10)
             .mapToObj(DigitDimAttributeImpl::new)
-            .collect(Collectors.toUnmodifiableList());
+            .sorted(Comparator.comparing(DimAttribute::getId))
+            .map((attribute)->(DigitDimAttribute)attribute)
+            .toList();
         digitDimAttributeMap = toMap(digitDimAttributeList);
         
         booleanDimAttributeList = List.of(
@@ -327,7 +335,9 @@ public final class DimRegistryImpl implements DimRegistry{
         
         weatherDimAttributeList = Stream.of(WeatherDimAttribute.WeatherType.values())
             .map(WeatherDimAttributeImpl::new)
-            .collect(Collectors.toUnmodifiableList());
+            .sorted(Comparator.comparing(DimAttribute::getId))
+            .map((attribute)->(WeatherDimAttribute)attribute)
+            .toList();
         weatherDimAttributeMap = toMap(weatherDimAttributeList);
     }
     

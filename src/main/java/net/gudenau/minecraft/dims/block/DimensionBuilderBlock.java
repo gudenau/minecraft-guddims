@@ -47,12 +47,11 @@ public final class DimensionBuilderBlock extends HorizontalFacingEntityBlock{
         
         // Make sure the block has the entity we need
         var rawEntity = world.getBlockEntity(pos);
-        if(!(rawEntity instanceof DimensionBuilderBlockEntity)){
+        if(!(rawEntity instanceof DimensionBuilderBlockEntity entity)){
             return ActionResult.FAIL;
         }
     
         // And make sure it is not building a dimension already
-        var entity = (DimensionBuilderBlockEntity)rawEntity;
         boolean building = entity.isBuilding();
         
         if(building){

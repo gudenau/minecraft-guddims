@@ -3,8 +3,6 @@ package net.gudenau.minecraft.dims.block.entity;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import net.fabricmc.fabric.api.util.NbtType;
 import net.gudenau.minecraft.dims.Dims;
@@ -18,7 +16,6 @@ import net.minecraft.inventory.SidedInventory;
 import net.minecraft.item.*;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtList;
-import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
@@ -119,7 +116,7 @@ public final class DimensionBuilderBlockEntity extends BlockEntity implements Si
             .map(DimensionAttributeItem::getAttribute)
             .filter(Optional::isPresent)
             .map(Optional::get)
-            .collect(Collectors.toUnmodifiableList());
+            .toList();
         
         var registry = DimRegistry.getInstance();
         // The registry implementation does most of the heavy lifting here
@@ -284,7 +281,7 @@ public final class DimensionBuilderBlockEntity extends BlockEntity implements Si
      */
     public void build(){
         if(!isBuilding() && output.isEmpty()){
-            buildingTime = attributeItems.size() * 20 + 20;
+            buildingTime = attributeItems.size() * 20L + 20;
             markDirty();
         }
     }

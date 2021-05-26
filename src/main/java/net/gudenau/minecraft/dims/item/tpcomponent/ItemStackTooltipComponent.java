@@ -3,7 +3,6 @@ package net.gudenau.minecraft.dims.item.tpcomponent;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.gudenau.minecraft.dims.api.v0.attribute.FluidDimAttribute;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.gui.tooltip.BundleTooltipComponent;

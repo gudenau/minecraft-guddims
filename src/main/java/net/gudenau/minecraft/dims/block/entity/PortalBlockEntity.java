@@ -4,7 +4,6 @@ import java.util.Optional;
 import net.fabricmc.fabric.api.util.NbtType;
 import net.gudenau.minecraft.dims.Dims;
 import net.gudenau.minecraft.dims.api.v0.util.DimensionalTeleportTarget;
-import net.gudenau.minecraft.dims.duck.EntityDuck;
 import net.gudenau.minecraft.dims.util.MiscStuff;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;

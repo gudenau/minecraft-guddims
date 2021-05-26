@@ -63,8 +63,9 @@ public final class DimensionAttributeItem extends Item{
             return Optional.empty();
         }
         
-        return DimAttributeType.get(new Identifier(tag.getString("AttributeKind")))
-            .flatMap(type->DimRegistry.getInstance().getAttribute(type, new Identifier(tag.getString("Attribute"))));
+        var registry = DimRegistry.getInstance();
+        return registry.getAttributeType(new Identifier(tag.getString("AttributeKind")))
+            .flatMap(type->registry.getAttribute(type, new Identifier(tag.getString("Attribute"))));
     }
     
     /**

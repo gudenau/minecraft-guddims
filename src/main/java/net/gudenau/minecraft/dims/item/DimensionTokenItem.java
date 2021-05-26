@@ -5,7 +5,6 @@ import net.fabricmc.fabric.api.util.NbtType;
 import net.gudenau.minecraft.dims.Dims;
 import net.gudenau.minecraft.dims.api.v0.DimRegistry;
 import net.gudenau.minecraft.dims.api.v0.attribute.DimAttribute;
-import net.gudenau.minecraft.dims.api.v0.attribute.DimAttributeType;
 import net.gudenau.minecraft.dims.item.tpdata.ItemStackCollectionTooltipData;
 import net.minecraft.client.item.TooltipContext;
 import net.minecraft.client.item.TooltipData;
@@ -81,7 +80,7 @@ public final class DimensionTokenItem extends Item{
         var list = new ArrayList<DimAttribute>();
         for(NbtElement element : tag.getList("attributes", NbtType.COMPOUND)){
             var compound = (NbtCompound)element;
-            var type = DimAttributeType.get(new Identifier(tag.getString("type")));
+            var type = registry.getAttributeType(new Identifier(tag.getString("type")));
             var attribute = type.flatMap((value)->
                 registry.getAttribute(value, new Identifier(compound.getString("attribute")))
             );

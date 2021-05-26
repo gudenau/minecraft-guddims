@@ -25,17 +25,13 @@ import net.minecraft.util.registry.RegistryKey;
 import net.minecraft.world.*;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.source.*;
-import net.minecraft.world.border.WorldBorder;
 import net.minecraft.world.chunk.ChunkStatus;
 import net.minecraft.world.dimension.DimensionType;
-import net.minecraft.world.gen.GeneratorOptions;
 import net.minecraft.world.gen.Spawner;
 import net.minecraft.world.gen.chunk.ChunkGenerator;
 import net.minecraft.world.gen.chunk.ChunkGeneratorSettings;
 import net.minecraft.world.gen.chunk.NoiseChunkGenerator;
 import net.minecraft.world.level.ServerWorldProperties;
-import net.minecraft.world.timer.Timer;
-import net.minecraft.world.timer.TimerCallbackSerializer;
 import org.jetbrains.annotations.Nullable;
 
 import static net.gudenau.minecraft.dims.Dims.MOD_ID;
@@ -67,7 +63,7 @@ final class DimInfo{
         var attributeList = tag.getList("attributes", NbtType.COMPOUND);
         for(var element : attributeList){
             var attributeTag = (NbtCompound)element;
-            var type = DimAttributeType.get(new Identifier(attributeTag.getString("type")))
+            var type = registry.getAttributeType(new Identifier(attributeTag.getString("type")))
                 .orElseThrow(()->new RuntimeException("Unknown type: " + attributeTag.getString("type")));
             attributes.add(registry.getAttribute(type, new Identifier(attributeTag.getString("attribute")))
                 .orElseThrow(()->new RuntimeException("Unknown attribute: " + attributeTag.getString("attribute"))));
@@ -125,7 +121,7 @@ final class DimInfo{
         for(int i = 0; i < attributes.size(); i++){
             var currentAttribute = attributes.get(i);
             // If we don't have a controller and the attribute isn't a controller itself, it's garbage
-            if(!(currentAttribute instanceof ControllerDimAttribute)){
+            if(!(currentAttribute instanceof ControllerDimAttribute controller)){
                 garbage.add(currentAttribute);
                 continue;
             }
@@ -137,8 +133,6 @@ final class DimInfo{
             }
             
             // Now we are getting somewhere, we have a controller
-            var controller = (ControllerDimAttribute)currentAttribute;
-            
             var appliedAttributes = new ArrayList<DimAttribute>();
             appliedAttributes.add(controller); // Not a bug, required for parsing later
             

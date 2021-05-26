@@ -3,12 +3,10 @@ package net.gudenau.minecraft.dims.item.tpcomponent;
 import com.mojang.blaze3d.systems.RenderSystem;
 import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawableHelper;
-import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.gui.tooltip.TooltipComponent;
 import net.minecraft.client.render.item.ItemRenderer;
 import net.minecraft.client.texture.TextureManager;
@@ -29,7 +27,7 @@ public final class ItemStackCollectionTooltipComponent implements TooltipCompone
     public ItemStackCollectionTooltipComponent(Collection<ItemStack> stacks){
         this.stacks = stacks.stream()
             .filter((stack)->!stack.isEmpty())
-            .collect(Collectors.toUnmodifiableList());
+            .toList();
     }
     
     @Override
