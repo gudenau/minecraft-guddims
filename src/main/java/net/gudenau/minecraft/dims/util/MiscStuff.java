@@ -8,9 +8,11 @@ import net.gudenau.minecraft.dims.accessor.WorldBorder$PropertiesAccessor;
 import net.gudenau.minecraft.dims.api.v0.util.DimensionalTeleportTarget;
 import net.gudenau.minecraft.dims.duck.EntityDuck;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.DyeColor;
 import net.minecraft.world.border.WorldBorder;
 import net.minecraft.world.timer.Timer;
@@ -53,7 +55,7 @@ public final class MiscStuff{
      * @param <T> The type of Timer
      * @return The read Timer
      */
-    public static Timer<MinecraftServer> timerFromNbt(NbtList list, TimerCallbackSerializer<MinecraftServer> serializer){
+    public static <T> Timer<T> timerFromNbt(NbtList list, TimerCallbackSerializer<T> serializer){
         var timer = new Timer<>(serializer);
         @SuppressWarnings("ConstantConditions")
         var timerAccessor = (TimerAccessor)timer;

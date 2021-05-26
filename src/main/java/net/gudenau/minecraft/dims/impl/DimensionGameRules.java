@@ -29,9 +29,9 @@ public final class DimensionGameRules extends GameRules{
     };
     private static Map<String, Key<?>> RULE_MAP;
     
-    private final Map<Key<?>, Rule<?>> overrides = Map.of(
+    private final Map<Key<?>, Rule<?>> overrides = new HashMap<>(Map.of(
         GameRules.DO_WEATHER_CYCLE, ALWAYS_FALSE
-    );
+    ));
     private final GameRules parent;
     
     public DimensionGameRules(GameRules parent){

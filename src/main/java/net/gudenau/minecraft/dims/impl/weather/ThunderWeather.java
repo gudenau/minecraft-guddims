@@ -39,7 +39,7 @@ public final class ThunderWeather implements WeatherController{
     
     @Override
     public boolean isRaining(){
-        return false;
+        return true;
     }
     
     @Override
