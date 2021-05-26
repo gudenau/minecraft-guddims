@@ -89,9 +89,9 @@ public final class BlockColorCache{
                 var pixel = pixels.get();
                 var alpha = (pixel >>> 24);
                 if(alpha == 0xFF){
-                    red += pixel & 0xFF;
+                    blue += pixel & 0xFF;
                     green += (pixel >> 8) & 0xFF;
-                    blue += (pixel >> 16) & 0xFF;
+                    red += (pixel >> 16) & 0xFF;
                     total++;
                 }
             }

@@ -3,6 +3,7 @@ package net.gudenau.minecraft.dims.util;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMaps;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
+import java.nio.ByteOrder;
 import java.nio.IntBuffer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -128,6 +129,8 @@ public final class MiscStuff{
         var accessor = (NativeImageAccessor)(Object)image;
         var pointer = accessor.getPointer();
         var sizeBytes = accessor.getSizeBytes();
-        return MemoryUtil.memIntBufferSafe(pointer, (int)sizeBytes);
+        return MemoryUtil.memByteBuffer(pointer, (int)sizeBytes)
+            .order(ByteOrder.nativeOrder())
+            .asIntBuffer();
     }
 }
