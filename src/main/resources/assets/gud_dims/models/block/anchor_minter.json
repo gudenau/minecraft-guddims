@@ -1,0 +1,12 @@
+{
+  "parent": "minecraft:block/cube",
+  "textures": {
+    "particle": "gud_dims:block/anchor_minter/side",
+    "down": "gud_dims:block/anchor_minter/bottom",
+    "up": "gud_dims:block/anchor_minter/top",
+    "north": "gud_dims:block/anchor_minter/side",
+    "east": "gud_dims:block/anchor_minter/side",
+    "south": "gud_dims:block/anchor_minter/side",
+    "west": "gud_dims:block/anchor_minter/side"
+  }
+}

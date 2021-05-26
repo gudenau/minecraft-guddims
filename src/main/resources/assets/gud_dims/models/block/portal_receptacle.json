@@ -1,0 +1,12 @@
+{
+  "parent": "minecraft:block/cube",
+  "textures": {
+    "particle": "gud_dims:block/portal_receptacle/front",
+    "down": "gud_dims:block/portal_receptacle/bottom",
+    "up": "gud_dims:block/portal_receptacle/side",
+    "north": "gud_dims:block/portal_receptacle/front",
+    "east": "gud_dims:block/portal_receptacle/side",
+    "south": "gud_dims:block/portal_receptacle/side",
+    "west": "gud_dims:block/portal_receptacle/side"
+  }
+}

@@ -2,6 +2,9 @@
   "biome_controller.gud_dims.single": "Single",
   "biome_controller.gud_dims.checkerboard": "Checkerboard",
 
+  "boolean.gud_dims.false": "False",
+  "boolean.gud_dims.true": "True",
+
   "block.gud_dims.anchor_minter": "Anchor Minter",
   "block.gud_dims.dimension_builder": "Dimension Builder",
   "block.gud_dims.portal_receptacle": "Portal Receptacle",
@@ -30,6 +33,8 @@
   "itemGroup.gud_dims.group": "gudDims",
   "itemGroup.gud_dims.misc": "Dimension Attributes: Misc",
 
+  "tooltip.gud_dims.target.dim": "Target: %s",
+  "tooltip.gud_dims.target.pos": "Pos: %d/%d/%d",
   "tooltip.gud_dims.type": "Attribute Type: ",
   "tooltip.gud_dims.type.biome": "Biome",
   "tooltip.gud_dims.type.biome_controller": "Biome Controller",

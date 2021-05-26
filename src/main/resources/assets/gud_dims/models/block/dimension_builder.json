@@ -1,0 +1,12 @@
+{
+  "parent": "minecraft:block/cube",
+  "textures": {
+    "particle": "gud_dims:block/dimension_builder/front",
+    "down": "gud_dims:block/dimension_builder/bottom",
+    "up": "gud_dims:block/dimension_builder/top",
+    "north": "gud_dims:block/dimension_builder/front",
+    "east": "gud_dims:block/dimension_builder/side",
+    "south": "gud_dims:block/dimension_builder/side",
+    "west": "gud_dims:block/dimension_builder/side"
+  }
+}

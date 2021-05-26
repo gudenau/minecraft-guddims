@@ -116,7 +116,7 @@ public final class DimensionAnchorItem extends Item{
         // Tell the user about the target, if present.
         getTarget(stack).ifPresent((target)->{
             var pos = target.position();
-            tooltip.add(new TranslatableText("tooltip.gud_dims.target.pos", pos.x, pos.y, pos.z));
+            tooltip.add(new TranslatableText("tooltip.gud_dims.target.pos", (long)(pos.x * 10) / 10F, (long)(pos.y * 10) / 10F, (long)(pos.z * 10) / 10F));
             var dimension = target.world().getValue();
             tooltip.add(new TranslatableText("tooltip.gud_dims.target.dim", dimension.toString()));
         });
