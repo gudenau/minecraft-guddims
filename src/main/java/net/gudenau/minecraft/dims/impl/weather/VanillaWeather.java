@@ -1,7 +1,11 @@
 package net.gudenau.minecraft.dims.impl.weather;
 
 import java.util.Random;
+import net.gudenau.minecraft.dims.api.v0.controller.WeatherDimController;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.util.Identifier;
+
+import static net.gudenau.minecraft.dims.Dims.MOD_ID;
 
 /**
  * The weather controller for dimensions with vanilla weather. Also provides a scale factor for the speed at which the
@@ -9,7 +13,9 @@ import net.minecraft.nbt.NbtCompound;
  *
  * @since 0.0.1
  */
-public final class VanillaWeather implements WeatherController{
+public final class VanillaWeather implements WeatherDimController.WeatherController{
+    private static final Identifier ID = new Identifier(MOD_ID, "vanilla");
+    
     private final Random random;
     private int scale;
     
@@ -72,7 +78,6 @@ public final class VanillaWeather implements WeatherController{
     @Override
     public NbtCompound toNbt(){
         var tag = new NbtCompound();
-        tag.putString("type", "vanilla");
         tag.putInt("scale", scale);
         tag.putInt("clearTime", clearTime);
         tag.putInt("rainTime", rainTime);
@@ -83,7 +88,11 @@ public final class VanillaWeather implements WeatherController{
     }
     
     @Override
-    public void fromNbt1(NbtCompound tag){
+    public Identifier getId(){
+        return ID;
+    }
+    
+    public void fromNbt(NbtCompound tag){
         scale = tag.getInt("scale");
         clearTime = tag.getInt("clearTime");
         rainTime = tag.getInt("rainTime");

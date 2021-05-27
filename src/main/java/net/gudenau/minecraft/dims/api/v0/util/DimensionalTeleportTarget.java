@@ -1,7 +1,6 @@
 package net.gudenau.minecraft.dims.api.v0.util;
 
 import java.util.Objects;
-import net.gudenau.minecraft.dims.api.v0.util.collection.ObjectIntPair;
 import net.minecraft.entity.Entity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.util.Identifier;

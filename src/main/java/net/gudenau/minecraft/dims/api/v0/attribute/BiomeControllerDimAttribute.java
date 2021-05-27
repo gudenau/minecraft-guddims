@@ -1,10 +1,6 @@
 package net.gudenau.minecraft.dims.api.v0.attribute;
 
 import net.gudenau.minecraft.dims.api.v0.controller.BiomeDimController;
-import net.gudenau.minecraft.dims.api.v0.util.IntRange;
-import net.minecraft.util.Identifier;
-
-import static net.gudenau.minecraft.dims.Dims.MOD_ID;
 
 /**
  * An attribute that represents a biome controller. This is what determines how the biomes will be distributed in a

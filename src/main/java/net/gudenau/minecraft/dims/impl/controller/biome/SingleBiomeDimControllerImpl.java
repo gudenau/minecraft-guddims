@@ -1,12 +1,10 @@
 package net.gudenau.minecraft.dims.impl.controller.biome;
 
-import com.mojang.serialization.Codec;
 import java.util.List;
 import net.gudenau.minecraft.dims.api.v0.controller.BiomeDimController;
 import net.gudenau.minecraft.dims.api.v0.util.IntRange;
 import net.gudenau.minecraft.dims.api.v0.util.collection.ObjectIntPair;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.source.BiomeSource;
 import net.minecraft.world.biome.source.FixedBiomeSource;

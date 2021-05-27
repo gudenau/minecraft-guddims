@@ -7,6 +7,7 @@
     "LevelStorage$SessionAccessor",
     "MinecraftServerAccessor",
     "TimerAccessor",
+    "WorldAccessor",
     "WorldBorder$PropertiesAccessor"
   ],
   "client": [

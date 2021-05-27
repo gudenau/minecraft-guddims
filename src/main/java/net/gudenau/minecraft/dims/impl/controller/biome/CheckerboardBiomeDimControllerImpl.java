@@ -9,7 +9,6 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.source.BiomeSource;
-import net.minecraft.world.biome.source.FixedBiomeSource;
 
 import static net.gudenau.minecraft.dims.Dims.MOD_ID;
 

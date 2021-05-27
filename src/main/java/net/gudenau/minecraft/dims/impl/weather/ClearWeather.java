@@ -1,25 +1,34 @@
 package net.gudenau.minecraft.dims.impl.weather;
 
+import net.gudenau.minecraft.dims.api.v0.controller.WeatherDimController;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.util.Identifier;
+
+import static net.gudenau.minecraft.dims.Dims.MOD_ID;
 
 /**
  * The weather controller for dimensions that are always clear.
  *
  * @since 0.0.1
  */
-public final class ClearWeather implements WeatherController{
+public final class ClearWeather implements WeatherDimController.WeatherController{
+    public static final WeatherDimController.WeatherController INSTANCE = new ClearWeather();
+    private static final Identifier ID = new Identifier(MOD_ID, "clear");
+    
+    private ClearWeather(){}
+    
     @Override
     public void tick(){}
     
     @Override
     public NbtCompound toNbt(){
-        var tag = new NbtCompound();
-        tag.putString("type", "clear");
-        return tag;
+        return new NbtCompound();
     }
     
     @Override
-    public void fromNbt1(NbtCompound tag){}
+    public Identifier getId(){
+        return ID;
+    }
     
     @Override
     public int getClearTime(){

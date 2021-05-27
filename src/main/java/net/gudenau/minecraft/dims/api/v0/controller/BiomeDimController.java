@@ -36,7 +36,7 @@ public interface BiomeDimController extends DimController<BiomeDimAttribute>{
     default List<Biome> generateBiomeList(Random random){
         var range = getValidBiomeCount();
         var rangeSize = range.size();
-        var biomeCount = random.nextInt(rangeSize) + range.lower();
+        var biomeCount = (rangeSize == 0 ? 0 : random.nextInt(rangeSize)) + range.lower();
         assert range.isValid(biomeCount) : String.format(
             "Generated biome count was invalid, range %d-%d, got %d",
             range.lower(), range.upper(), biomeCount

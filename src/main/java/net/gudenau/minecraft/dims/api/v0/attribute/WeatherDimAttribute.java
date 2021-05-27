@@ -1,5 +1,7 @@
 package net.gudenau.minecraft.dims.api.v0.attribute;
 
+import net.gudenau.minecraft.dims.api.v0.controller.WeatherDimController;
+
 /**
  * An attribute that represents how weather works in a dimension.
  *
@@ -11,15 +13,10 @@ public interface WeatherDimAttribute extends ControllerDimAttribute{
      *
      * @return The associated weather type
      */
-    WeatherType getWeather();
+    WeatherDimController getController();
     
     @Override
     default DimAttributeType getType(){
         return DimAttributeType.WEATHER;
-    }
-    
-    //TODO Make this extendable
-    enum WeatherType{
-        NORMAL, CLEAR, RAIN, THUNDER, ACCELERATED
     }
 }

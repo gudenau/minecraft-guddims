@@ -3,10 +3,14 @@ package net.gudenau.minecraft.dims.impl;
 import java.util.Random;
 import java.util.UUID;
 import net.fabricmc.fabric.api.util.NbtType;
-import net.gudenau.minecraft.dims.impl.weather.WeatherController;
+import net.gudenau.minecraft.dims.api.v0.DimRegistry;
+import net.gudenau.minecraft.dims.api.v0.attribute.DimAttributeType;
+import net.gudenau.minecraft.dims.api.v0.attribute.WeatherDimAttribute;
+import net.gudenau.minecraft.dims.api.v0.controller.WeatherDimController;
 import net.gudenau.minecraft.dims.util.MiscStuff;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.Identifier;
 import net.minecraft.world.*;
 import net.minecraft.world.border.WorldBorder;
 import net.minecraft.world.level.ServerWorldProperties;
@@ -20,12 +24,14 @@ import org.jetbrains.annotations.Nullable;
  * @since 0.0.1
  */
 public final class DimensionWorldProperties implements ServerWorldProperties{
+    private static final DimRegistry DIM_REGISTRY = DimRegistry.getInstance();
+    
     /**
      * The overworld props for things that we just mirror from there.
      */
     private final ServerWorldProperties overworldProps;
     private final String name;
-    private final WeatherController weatherController;
+    private final WeatherDimController.WeatherController weatherController;
     private final DimensionGameRules gameRules;
     private WorldBorder.Properties worldBorder;
     private final Timer<MinecraftServer> timer;
@@ -42,7 +48,7 @@ public final class DimensionWorldProperties implements ServerWorldProperties{
     private int spawnZ;
     private float spawnAngle;
     
-    DimensionWorldProperties(ServerWorldProperties overworldProps, String name, WeatherController weatherController, DimensionGameRules gameRules){
+    DimensionWorldProperties(ServerWorldProperties overworldProps, String name, WeatherDimController.WeatherController weatherController, DimensionGameRules gameRules){
         this(
             overworldProps, name, weatherController, gameRules,
             WorldBorder.DEFAULT_BORDER,
@@ -50,7 +56,7 @@ public final class DimensionWorldProperties implements ServerWorldProperties{
         );
     }
     
-    private DimensionWorldProperties(ServerWorldProperties overworldProps, String name, WeatherController weatherController, DimensionGameRules gameRules, WorldBorder.Properties worldBorder, Timer<MinecraftServer> timer){
+    private DimensionWorldProperties(ServerWorldProperties overworldProps, String name, WeatherDimController.WeatherController weatherController, DimensionGameRules gameRules, WorldBorder.Properties worldBorder, Timer<MinecraftServer> timer){
         this.overworldProps = overworldProps;
         this.name = name;
         this.weatherController = weatherController;
@@ -59,12 +65,15 @@ public final class DimensionWorldProperties implements ServerWorldProperties{
         this.timer = timer;
     }
     
-    static DimensionWorldProperties fromNbt(NbtCompound compound, ServerWorldProperties overworldProps, String name, GameRules parentRules){
-        // new Timer<>(TimerCallbackSerializer.INSTANCE)
+    static DimensionWorldProperties fromNbt(Random random, NbtCompound compound, ServerWorldProperties overworldProps, String name, GameRules parentRules){
+        var weatherTag = compound.getCompound("weather");
+        var weatherAttribute = DIM_REGISTRY.<WeatherDimAttribute>getAttribute(DimAttributeType.WEATHER, new Identifier(weatherTag.getString("type")))
+            .orElseThrow(()->new RuntimeException("Weather attribute \"" + weatherTag.getString("type") + "\" was not found"));
+        
         var props = new DimensionWorldProperties(
             overworldProps,
             name,
-            WeatherController.fromNbt(new Random() /* TODO Make this the world random you lazy idiot */, compound.getCompound("weather")),
+            weatherAttribute.getController().loadController(random, weatherTag.getCompound("state")),
             DimensionGameRules.fromNbt(compound.getCompound("rules"), parentRules),
             MiscStuff.worldBorderFromNbt(compound.getCompound("border")),
             MiscStuff.timerFromNbt(compound.getList("timer", NbtType.COMPOUND), TimerCallbackSerializer.INSTANCE)
@@ -87,7 +96,10 @@ public final class DimensionWorldProperties implements ServerWorldProperties{
     
     NbtCompound toNbt(){
         var compound = new NbtCompound();
-        compound.put("weather", weatherController.toNbt());
+        var weatherTag = new NbtCompound();
+        weatherTag.putString("type", weatherController.getId().toString());
+        weatherTag.put("state", weatherController.toNbt());
+        compound.put("weather", weatherTag);
         compound.put("rules", gameRules.toNbt());
         compound.put("border", MiscStuff.worldBorderToNbt(worldBorder));
         compound.put("timer", timer.toNbt());

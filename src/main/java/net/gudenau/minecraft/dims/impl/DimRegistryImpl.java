@@ -20,6 +20,7 @@ import net.gudenau.minecraft.dims.api.v0.*;
 import net.gudenau.minecraft.dims.api.v0.attribute.*;
 import net.gudenau.minecraft.dims.api.v0.controller.BiomeDimController;
 import net.gudenau.minecraft.dims.api.v0.controller.DimController;
+import net.gudenau.minecraft.dims.api.v0.controller.WeatherDimController;
 import net.gudenau.minecraft.dims.impl.attribute.*;
 import net.minecraft.block.Blocks;
 import net.minecraft.item.AirBlockItem;
@@ -34,7 +35,6 @@ import net.minecraft.util.Language;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.util.registry.RegistryKey;
 import net.minecraft.world.World;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * The implementation of the registry.
@@ -70,8 +70,8 @@ public final class DimRegistryImpl implements DimRegistry{
     private List<BooleanDimAttribute> booleanDimAttributeList;
     private Map<Identifier, BooleanDimAttribute> booleanDimAttributeMap;
     
-    private List<WeatherDimAttribute> weatherDimAttributeList;
-    private Map<Identifier, WeatherDimAttribute> weatherDimAttributeMap;
+    private final List<WeatherDimAttribute> weatherDimAttributeList = new ArrayList<>();
+    private final Map<Identifier, WeatherDimAttribute> weatherDimAttributeMap = new HashMap<>();
     
     private final Set<DimInfo> pendingDims = new HashSet<>();
     
@@ -87,7 +87,7 @@ public final class DimRegistryImpl implements DimRegistry{
             case BIOME_CONTROLLER -> Collections.unmodifiableList(biomeControllerAttributeList);
             case DIGIT -> digitDimAttributeList;
             case BOOLEAN -> booleanDimAttributeList;
-            case WEATHER -> weatherDimAttributeList;
+            case WEATHER -> Collections.unmodifiableList(weatherDimAttributeList);
         };
     }
     
@@ -113,7 +113,7 @@ public final class DimRegistryImpl implements DimRegistry{
             case BIOME_CONTROLLER -> Collections.unmodifiableMap(biomeControllerAttributeMap);
             case DIGIT -> digitDimAttributeMap;
             case BOOLEAN -> booleanDimAttributeMap;
-            case WEATHER -> weatherDimAttributeMap;
+            case WEATHER -> Collections.unmodifiableMap(weatherDimAttributeMap);
         }).get(attribute));
     }
     
@@ -203,7 +203,13 @@ public final class DimRegistryImpl implements DimRegistry{
                 }
                 biomeControllerAttributeList.add(attribute);
             }
-            case WEATHER -> throw new UnsupportedOperationException("TODO");//TODO
+            case WEATHER -> {
+                var attribute = new WeatherDimAttributeImpl((WeatherDimController)controller);
+                if(weatherDimAttributeMap.putIfAbsent(attribute.getId(), attribute) != null){
+                    throw new IllegalStateException("Weather controller " + attribute.getId() + " was already registered");
+                }
+                weatherDimAttributeList.add(attribute);
+            }
         }
     }
     
@@ -342,13 +348,6 @@ public final class DimRegistryImpl implements DimRegistry{
             new BooleanDimAttributeImpl(true)
         );
         booleanDimAttributeMap = toMap(booleanDimAttributeList);
-        
-        weatherDimAttributeList = Stream.of(WeatherDimAttribute.WeatherType.values())
-            .map(WeatherDimAttributeImpl::new)
-            .sorted(Comparator.comparing(DimAttribute::getId))
-            .map((attribute)->(WeatherDimAttribute)attribute)
-            .toList();
-        weatherDimAttributeMap = toMap(weatherDimAttributeList);
     }
     
     private static <T extends DimAttribute> Map<Identifier, T> toMap(List<T> attributes){

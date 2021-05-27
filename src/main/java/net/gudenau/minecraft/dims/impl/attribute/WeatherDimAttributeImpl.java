@@ -1,11 +1,9 @@
 package net.gudenau.minecraft.dims.impl.attribute;
 
-import java.util.Locale;
 import net.gudenau.minecraft.dims.api.v0.attribute.DimAttribute;
 import net.gudenau.minecraft.dims.api.v0.attribute.WeatherDimAttribute;
+import net.gudenau.minecraft.dims.api.v0.controller.WeatherDimController;
 import net.minecraft.util.Identifier;
-
-import static net.gudenau.minecraft.dims.Dims.MOD_ID;
 
 /**
  * The backing implementation to the weather attribute interface.
@@ -13,17 +11,17 @@ import static net.gudenau.minecraft.dims.Dims.MOD_ID;
  * @since 0.0.1
  */
 public final class WeatherDimAttributeImpl implements WeatherDimAttribute{
-    private final WeatherType type;
+    private final WeatherDimController controller;
     private final Identifier id;
     
-    public WeatherDimAttributeImpl(WeatherType type){
-        this.type = type;
-        id = new Identifier(MOD_ID, type.name().toLowerCase(Locale.ROOT));
+    public WeatherDimAttributeImpl(WeatherDimController controller){
+        this.controller = controller;
+        id = controller.getId();
     }
     
     @Override
     public boolean isPropertyValid(DimAttribute attribute){
-        return false;
+        return controller.isPropertyValid(attribute);
     }
     
     @Override
@@ -32,7 +30,7 @@ public final class WeatherDimAttributeImpl implements WeatherDimAttribute{
     }
     
     @Override
-    public WeatherType getWeather(){
-        return type;
+    public WeatherDimController getController(){
+        return controller;
     }
 }

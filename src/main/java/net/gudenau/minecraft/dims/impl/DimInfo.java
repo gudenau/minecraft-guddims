@@ -5,14 +5,14 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.function.BooleanSupplier;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import net.fabricmc.fabric.api.util.NbtType;
 import net.gudenau.minecraft.dims.accessor.MinecraftServerAccessor;
+import net.gudenau.minecraft.dims.accessor.WorldAccessor;
 import net.gudenau.minecraft.dims.api.v0.DimRegistry;
 import net.gudenau.minecraft.dims.api.v0.attribute.*;
+import net.gudenau.minecraft.dims.api.v0.controller.WeatherDimController;
 import net.gudenau.minecraft.dims.api.v0.util.collection.ObjectIntPair;
-import net.gudenau.minecraft.dims.impl.weather.WeatherController;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.server.MinecraftServer;
@@ -23,9 +23,10 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.util.registry.RegistryKey;
-import net.minecraft.world.*;
+import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
-import net.minecraft.world.biome.source.*;
+import net.minecraft.world.biome.source.BiomeSource;
+import net.minecraft.world.biome.source.HorizontalVoronoiBiomeAccessType;
 import net.minecraft.world.chunk.ChunkStatus;
 import net.minecraft.world.dimension.DimensionType;
 import net.minecraft.world.gen.Spawner;
@@ -43,7 +44,7 @@ import static net.gudenau.minecraft.dims.Dims.MOD_ID;
  * @since 0.0.1
  */
 final class DimInfo{
-    private static final DimRegistry registry = DimRegistry.getInstance();
+    private static final DimRegistry DIM_REGISTRY = DimRegistry.getInstance();
     private static final Random RANDOM = new Random(System.nanoTime() ^ 0xDEADC0DEDEADBEEFL);
     
     private final UUID uuid;
@@ -53,6 +54,7 @@ final class DimInfo{
     private final RegistryKey<World> registryKey;
     private final DimensionType dimensionType;
     private final RegistryKey<DimensionType> dimensionTypeKey;
+    private final Random random;
     
     private BiomeSource biomeSource;
     private DimensionWorldProperties worldProps;
@@ -60,14 +62,15 @@ final class DimInfo{
     DimInfo(MinecraftServer server, Path root, NbtCompound tag){
         uuid = tag.getUuid("uuid");
         name = tag.getString("name");
+        random = new Random(uuid.getLeastSignificantBits() ^ uuid.getMostSignificantBits() ^ System.currentTimeMillis());
         
         var attributes = new ArrayList<DimAttribute>();
         var attributeList = tag.getList("attributes", NbtType.COMPOUND);
         for(var element : attributeList){
             var attributeTag = (NbtCompound)element;
-            var type = registry.getAttributeType(new Identifier(attributeTag.getString("type")))
+            var type = DIM_REGISTRY.getAttributeType(new Identifier(attributeTag.getString("type")))
                 .orElseThrow(()->new RuntimeException("Unknown type: " + attributeTag.getString("type")));
-            attributes.add(registry.getAttribute(type, new Identifier(attributeTag.getString("attribute")))
+            attributes.add(DIM_REGISTRY.getAttribute(type, new Identifier(attributeTag.getString("attribute")))
                 .orElseThrow(()->new RuntimeException("Unknown attribute: " + attributeTag.getString("attribute"))));
         }
         this.attributes = Collections.unmodifiableList(attributes);
@@ -81,6 +84,7 @@ final class DimInfo{
         parseAttributes(server, attributes);
         
         worldProps = DimensionWorldProperties.fromNbt(
+            random,
             tag.getCompound("props"),
             (ServerWorldProperties)server.getOverworld().getLevelProperties(),
             name,
@@ -96,6 +100,7 @@ final class DimInfo{
     public DimInfo(MinecraftServer server, UUID uuid, String name, Path savePath, List<DimAttribute> attributes){
         this.uuid = uuid;
         this.name = name;
+        random = new Random(uuid.getLeastSignificantBits() ^ uuid.getMostSignificantBits() ^ System.currentTimeMillis());
         parseAttributes(server, attributes);
         this.attributes = List.copyOf(attributes);
         this.saveLocation = savePath.resolve("dims").resolve(uuid.toString());
@@ -170,22 +175,31 @@ final class DimInfo{
      * @return The dimension props
      */
     private DimensionWorldProperties createWorldProperties(MinecraftServer server, Map<DimAttributeType, List<DimAttribute>> attributeMap){
-        // ServerWorldProperties overworldProps, String name, WeatherController weatherController, DimensionGameRules gameRules
-        
-        var weatherController = Optional.ofNullable(attributeMap.get(DimAttributeType.WEATHER))
-            .map((attributes)->((WeatherDimAttribute)attributes.get(0)).getWeather())
-            //TODO Make this the world random you lazy idiot
-            .map((type)->WeatherController.create(new Random(), type))
-            .orElseGet(()->WeatherController.createDefault(new Random()));
-        
         var gameRules = new DimensionGameRules(server.getGameRules());
         
         return new DimensionWorldProperties(
             (ServerWorldProperties)server.getOverworld().getLevelProperties(),
             name,
-            weatherController,
+            createWeatherController(random, attributeMap.get(DimAttributeType.WEATHER)),
             gameRules
         );
+    }
+    
+    /**
+     * Creates a new weather controller from the provided attributes.
+     *
+     * @param random The world's random
+     * @param attributes The weather attributes
+     * @return The new weather controller
+     */
+    private WeatherDimController.WeatherController createWeatherController(Random random, List<DimAttribute> attributes){
+        WeatherDimController controller;
+        if(attributes == null || attributes.isEmpty()){
+            controller = DIM_REGISTRY.<WeatherDimAttribute>getRandomAttribute(DimAttributeType.WEATHER).getController();
+        }else{
+            controller = ((WeatherDimAttribute)attributes.get(0)).getController();
+        }
+        return controller.createController(random, attributes == null ? List.of() : attributes);
     }
     
     /**
@@ -199,7 +213,7 @@ final class DimInfo{
         if(attributes == null){
             attributes = new ArrayList<>();
             // Pick a random controller
-            BiomeControllerDimAttribute controller = registry.getRandomAttribute(DimAttributeType.BIOME_CONTROLLER);
+            BiomeControllerDimAttribute controller = DIM_REGISTRY.getRandomAttribute(DimAttributeType.BIOME_CONTROLLER);
             attributes.add(controller);
         }
         
@@ -219,7 +233,7 @@ final class DimInfo{
         // TODO Penalize removing and adding biomes at this stage
         // Make sure their are just the right amount of biomes
         while(biomeRange.isOver(biomeList.size())){
-            biomeList.add(registry.<BiomeDimAttribute>getRandomAttribute(DimAttributeType.BIOME).getBiome());
+            biomeList.add(DIM_REGISTRY.<BiomeDimAttribute>getRandomAttribute(DimAttributeType.BIOME).getBiome());
         }
         while(biomeRange.isUnder(biomeList.size())){
             biomeList.remove(biomeList.size() - 1);
@@ -342,7 +356,7 @@ final class DimInfo{
         );
         List<Spawner> entitySpawners = List.of();
         
-        return new ServerWorld(
+        var world = new ServerWorld(
             server,
             ((MinecraftServerAccessor)server).getWorkerExecutor(),
             ((MinecraftServerAccessor)server).getSession(),
@@ -362,6 +376,8 @@ final class DimInfo{
                 super.tick(shouldKeepTicking);
             }
         };
+        ((WorldAccessor)(Object)world).setRandom(random);
+        return world;
     }
     
     /**
