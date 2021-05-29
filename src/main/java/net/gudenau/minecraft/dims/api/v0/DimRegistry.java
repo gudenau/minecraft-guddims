@@ -64,7 +64,6 @@ public interface DimRegistry{
      * @return The attribute type or empty
      */
     default Optional<DimAttributeType> getAttributeType(Identifier attributeType){
-        //noinspection removal
         return DimAttributeType.get(attributeType);
     }
     
@@ -137,5 +136,10 @@ public interface DimRegistry{
         controllers.forEach(this::registerController);
     }
     
+    /**
+     * Registers a dimension controller.
+     *
+     * @param controller The controller to register
+     */
     void registerController(DimController<?> controller);
 }

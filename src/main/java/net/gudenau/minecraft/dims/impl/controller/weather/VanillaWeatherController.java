@@ -8,6 +8,11 @@ import net.minecraft.util.Identifier;
 
 import static net.gudenau.minecraft.dims.Dims.MOD_ID;
 
+/**
+ * The default Vanilla weather controller implementation.
+ *
+ * @since 0.0.3
+ */
 public class VanillaWeatherController implements WeatherDimController{
     private final Identifier id;
     private final int scale;

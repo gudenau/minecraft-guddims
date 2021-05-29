@@ -26,4 +26,14 @@ public interface DimController<T extends DimAttribute>{
      * @return The type of controller
      */
     ControllerType getType();
+    
+    /**
+     * Check if an attribute is valid for a this controller.
+     *
+     * Used in case you want to pass arguments to the controller.
+     *
+     * @param attribute The attribute to check
+     * @return True if valid, false if not
+     */
+    boolean isPropertyValid(DimAttribute attribute);
 }

@@ -27,9 +27,4 @@ public final class BiomeControllerDimAttributeImpl implements BiomeControllerDim
     public Identifier getId(){
         return controller.getId();
     }
-    
-    @Override
-    public boolean isPropertyValid(DimAttribute attribute){
-        return attribute.getType() == DimAttributeType.BIOME;
-    }
 }

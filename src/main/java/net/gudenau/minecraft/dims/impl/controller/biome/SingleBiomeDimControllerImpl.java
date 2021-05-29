@@ -1,6 +1,8 @@
 package net.gudenau.minecraft.dims.impl.controller.biome;
 
 import java.util.List;
+import net.gudenau.minecraft.dims.api.v0.attribute.BiomeDimAttribute;
+import net.gudenau.minecraft.dims.api.v0.attribute.DimAttribute;
 import net.gudenau.minecraft.dims.api.v0.controller.BiomeDimController;
 import net.gudenau.minecraft.dims.api.v0.util.IntRange;
 import net.gudenau.minecraft.dims.api.v0.util.collection.ObjectIntPair;

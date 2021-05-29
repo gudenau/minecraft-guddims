@@ -6,5 +6,5 @@ package net.gudenau.minecraft.dims.api.v0.controller;
  * @since 0.0.3
  */
 public enum ControllerType{
-    BIOME, WEATHER
+    BIOME, WEATHER, SKYLIGHT
 }

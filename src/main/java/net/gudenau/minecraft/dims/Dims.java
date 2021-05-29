@@ -181,6 +181,7 @@ public final class Dims implements ModInitializer, DimsInitializer{
         public static final Item DIMENSION_ATTRIBUTE_COLOR = new DimensionAttributeItem(DimAttributeType.COLOR, new FabricItemSettings().group(MISC_GROUP));
         public static final Item DIMENSION_ATTRIBUTE_DIGIT = new DimensionAttributeItem(DimAttributeType.DIGIT, new FabricItemSettings().group(MISC_GROUP));
         public static final Item DIMENSION_ATTRIBUTE_FLUID = new DimensionAttributeItem(DimAttributeType.FLUID, new FabricItemSettings().group(FLUID_GROUP));
+        public static final Item DIMENSION_ATTRIBUTE_SKYLIGHT = new DimensionAttributeItem(DimAttributeType.SKYLIGHT, new FabricItemSettings().group(CONTROLLER_GROUP));
         public static final Item DIMENSION_ATTRIBUTE_WEATHER = new DimensionAttributeItem(DimAttributeType.WEATHER, new FabricItemSettings().group(CONTROLLER_GROUP));
         
         public static final Item DIMENSION_ANCHOR = new DimensionAnchorItem(new FabricItemSettings().group(GROUP).maxCount(1));
@@ -207,6 +208,7 @@ public final class Dims implements ModInitializer, DimsInitializer{
             register("dimension_attribute_color", DIMENSION_ATTRIBUTE_COLOR);
             register("dimension_attribute_digit", DIMENSION_ATTRIBUTE_DIGIT);
             register("dimension_attribute_fluid", DIMENSION_ATTRIBUTE_FLUID);
+            register("dimension_attribute_skylight", DIMENSION_ATTRIBUTE_SKYLIGHT);
             register("dimension_attribute_weather", DIMENSION_ATTRIBUTE_WEATHER);
             
             register("dimension_anchor", DIMENSION_ANCHOR);

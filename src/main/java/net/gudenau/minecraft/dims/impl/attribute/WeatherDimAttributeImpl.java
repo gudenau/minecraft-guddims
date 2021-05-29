@@ -20,11 +20,6 @@ public final class WeatherDimAttributeImpl implements WeatherDimAttribute{
     }
     
     @Override
-    public boolean isPropertyValid(DimAttribute attribute){
-        return controller.isPropertyValid(attribute);
-    }
-    
-    @Override
     public Identifier getId(){
         return id;
     }

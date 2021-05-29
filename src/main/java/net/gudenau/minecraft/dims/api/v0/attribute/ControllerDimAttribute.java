@@ -1,5 +1,7 @@
 package net.gudenau.minecraft.dims.api.v0.attribute;
 
+import net.gudenau.minecraft.dims.api.v0.controller.DimController;
+
 /**
  * A generic controller attribute.
  *
@@ -7,7 +9,7 @@ package net.gudenau.minecraft.dims.api.v0.attribute;
  *
  * @since 0.0.1
  */
-public interface ControllerDimAttribute extends DimAttribute{
+public interface ControllerDimAttribute<T extends DimAttribute, C extends DimController<T>> extends DimAttribute{
     /**
      * Checks if an attribute would be a valid property of this controller.
      *
@@ -16,5 +18,15 @@ public interface ControllerDimAttribute extends DimAttribute{
      * @param attribute The attribute to check
      * @return True if valid, false if invalid
      */
-    boolean isPropertyValid(DimAttribute attribute);
+    @Deprecated(forRemoval = true)
+    default boolean isPropertyValid(DimAttribute attribute){
+        return getController().isPropertyValid(attribute);
+    }
+    
+    /**
+     * Gets the {@link DimController} for this attribute.
+     *
+     * @return The controller
+     */
+    C getController();
 }

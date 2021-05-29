@@ -18,9 +18,7 @@ import net.gudenau.minecraft.dims.accessor.LevelStorage$SessionAccessor;
 import net.gudenau.minecraft.dims.accessor.MinecraftServerAccessor;
 import net.gudenau.minecraft.dims.api.v0.*;
 import net.gudenau.minecraft.dims.api.v0.attribute.*;
-import net.gudenau.minecraft.dims.api.v0.controller.BiomeDimController;
-import net.gudenau.minecraft.dims.api.v0.controller.DimController;
-import net.gudenau.minecraft.dims.api.v0.controller.WeatherDimController;
+import net.gudenau.minecraft.dims.api.v0.controller.*;
 import net.gudenau.minecraft.dims.impl.attribute.*;
 import net.minecraft.block.Blocks;
 import net.minecraft.item.AirBlockItem;
@@ -73,6 +71,9 @@ public final class DimRegistryImpl implements DimRegistry{
     private final List<WeatherDimAttribute> weatherDimAttributeList = new ArrayList<>();
     private final Map<Identifier, WeatherDimAttribute> weatherDimAttributeMap = new HashMap<>();
     
+    private final List<SkylightDimAttribute> skylightDimAttributeList = new ArrayList<>();
+    private final Map<Identifier, SkylightDimAttribute> skylightDimAttributeMap = new HashMap<>();
+    
     private final Set<DimInfo> pendingDims = new HashSet<>();
     
     @SuppressWarnings({"unchecked", "RedundantCast"})
@@ -88,6 +89,7 @@ public final class DimRegistryImpl implements DimRegistry{
             case DIGIT -> digitDimAttributeList;
             case BOOLEAN -> booleanDimAttributeList;
             case WEATHER -> Collections.unmodifiableList(weatherDimAttributeList);
+            case SKYLIGHT -> Collections.unmodifiableList(skylightDimAttributeList);
         };
     }
     
@@ -114,6 +116,7 @@ public final class DimRegistryImpl implements DimRegistry{
             case DIGIT -> digitDimAttributeMap;
             case BOOLEAN -> booleanDimAttributeMap;
             case WEATHER -> Collections.unmodifiableMap(weatherDimAttributeMap);
+            case SKYLIGHT -> Collections.unmodifiableMap(skylightDimAttributeMap);
         }).get(attribute));
     }
     
@@ -124,7 +127,7 @@ public final class DimRegistryImpl implements DimRegistry{
             uuid = UUID.randomUUID();
         }
         
-        var info = new DimInfo(server, uuid, "gud_dims_" + dimensions.size(), getSavePath(server), attributes);
+        var info = new DimInfo(server, uuid, "gud_dims_" + dimensions.size(), attributes);
         
         synchronized(pendingDims){
             pendingDims.add(info);
@@ -210,6 +213,13 @@ public final class DimRegistryImpl implements DimRegistry{
                 }
                 weatherDimAttributeList.add(attribute);
             }
+            case SKYLIGHT -> {
+                var attribute = new SkylightDimAttributeImpl((SkylightDimController)controller);
+                if(skylightDimAttributeMap.putIfAbsent(attribute.getId(), attribute) != null){
+                    throw new IllegalStateException("Skylight controller " + attribute.getId() + " was already registered");
+                }
+                skylightDimAttributeList.add(attribute);
+            }
         }
     }
     
@@ -240,7 +250,7 @@ public final class DimRegistryImpl implements DimRegistry{
             throw new RuntimeException("Failed to load extra dimensions", e);
         }
         for(var element : tag.getList("dimensions", NbtType.COMPOUND)){
-            var dim = new DimInfo(server, path, (NbtCompound)element);
+            var dim = new DimInfo(server, (NbtCompound)element);
             dimensions.put(dim.getUuid(), dim);
         }
     }
@@ -266,7 +276,7 @@ public final class DimRegistryImpl implements DimRegistry{
             
             var dims = new NbtList();
             for(var info : dimensions.values()){
-                dims.add(info.toNbt(path));
+                dims.add(info.toNbt());
             }
             tag.put("dimensions", dims);
     

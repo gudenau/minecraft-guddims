@@ -3,6 +3,7 @@ package net.gudenau.minecraft.dims.api.v0.controller;
 import java.util.*;
 import net.gudenau.minecraft.dims.api.v0.DimRegistry;
 import net.gudenau.minecraft.dims.api.v0.attribute.BiomeDimAttribute;
+import net.gudenau.minecraft.dims.api.v0.attribute.DimAttribute;
 import net.gudenau.minecraft.dims.api.v0.attribute.DimAttributeType;
 import net.gudenau.minecraft.dims.api.v0.util.IntRange;
 import net.gudenau.minecraft.dims.api.v0.util.collection.ObjectIntPair;
@@ -58,4 +59,9 @@ public interface BiomeDimController extends DimController<BiomeDimAttribute>{
      * @return A pair of values, the biome source and the amount of instability generated
      */
     ObjectIntPair<BiomeSource> createBiomeSource(List<Biome> biomes);
+    
+    @Override
+    default boolean isPropertyValid(DimAttribute attribute){
+        return attribute.getType() == DimAttributeType.BIOME;
+    }
 }

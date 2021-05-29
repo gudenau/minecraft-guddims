@@ -22,7 +22,8 @@ public enum DimAttributeType{
     BIOME_CONTROLLER("biome_controller"),
     DIGIT("digit"),
     BOOLEAN("boolean"),
-    WEATHER("weather");
+    WEATHER("weather"),
+    SKYLIGHT("skylight");
     
     private static final Map<Identifier, DimAttributeType> VALUE_MAP;
     

@@ -5,7 +5,6 @@ import java.util.Random;
 import net.gudenau.minecraft.dims.api.v0.attribute.DimAttribute;
 import net.gudenau.minecraft.dims.api.v0.attribute.WeatherDimAttribute;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
 import net.minecraft.util.Identifier;
 
 /**
@@ -42,21 +41,14 @@ public interface WeatherDimController extends DimController<WeatherDimAttribute>
      */
     WeatherController loadController(Random random, NbtCompound tag);
     
-    /**
-     * Check if an attribute is valid for a this controller.
-     *
-     * Used in case you want to pass arguments to the controller.
-     *
-     * @param attribute The attribute to check
-     * @return True if valid, false if not
-     */
-    default boolean isPropertyValid(DimAttribute attribute){
-        return false;
-    }
-    
     @Override
     default ControllerType getType(){
         return ControllerType.WEATHER;
+    }
+    
+    @Override
+    default boolean isPropertyValid(DimAttribute attribute){
+        return false;
     }
     
     /**

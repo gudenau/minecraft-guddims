@@ -2,7 +2,6 @@ package net.gudenau.minecraft.dims.impl;
 
 import com.mojang.serialization.Lifecycle;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-import java.nio.file.Path;
 import java.util.*;
 import java.util.function.BooleanSupplier;
 import java.util.stream.Collectors;
@@ -50,16 +49,15 @@ final class DimInfo{
     private final UUID uuid;
     private final String name;
     private final List<DimAttribute> attributes;
-    private final Path saveLocation;
     private final RegistryKey<World> registryKey;
-    private final DimensionType dimensionType;
     private final RegistryKey<DimensionType> dimensionTypeKey;
     private final Random random;
     
     private BiomeSource biomeSource;
     private DimensionWorldProperties worldProps;
+    private DimensionType dimensionType;
     
-    DimInfo(MinecraftServer server, Path root, NbtCompound tag){
+    DimInfo(MinecraftServer server, NbtCompound tag){
         uuid = tag.getUuid("uuid");
         name = tag.getString("name");
         random = new Random(uuid.getLeastSignificantBits() ^ uuid.getMostSignificantBits() ^ System.currentTimeMillis());
@@ -75,11 +73,6 @@ final class DimInfo{
         }
         this.attributes = Collections.unmodifiableList(attributes);
         
-        saveLocation = root.resolve(tag.getString("save")).toAbsolutePath();
-        if(!saveLocation.startsWith(root)){
-            throw new RuntimeException("Path traversal!");
-        }
-        
         //TODO Make this NBT based
         parseAttributes(server, attributes);
         
@@ -94,19 +87,17 @@ final class DimInfo{
         registryKey = RegistryKey.of(Registry.WORLD_KEY, new Identifier(MOD_ID, getName()));
         dimensionTypeKey = RegistryKey.of(Registry.DIMENSION_TYPE_KEY, new Identifier(MOD_ID, getName()));
         // create(OptionalLong.empty(), true, false, false, true, 1.0D, false, false, true, false, true, 0, 256, 256, HorizontalVoronoiBiomeAccessType.INSTANCE, BlockTags.INFINIBURN_OVERWORLD.getId(), OVERWORLD_ID, 0.0F);
-        dimensionType = createDimType(server);
+        dimensionType = loadDimType(server, tag.getCompound("dimType"));
     }
     
-    public DimInfo(MinecraftServer server, UUID uuid, String name, Path savePath, List<DimAttribute> attributes){
+    public DimInfo(MinecraftServer server, UUID uuid, String name, List<DimAttribute> attributes){
         this.uuid = uuid;
         this.name = name;
         random = new Random(uuid.getLeastSignificantBits() ^ uuid.getMostSignificantBits() ^ System.currentTimeMillis());
-        parseAttributes(server, attributes);
-        this.attributes = List.copyOf(attributes);
-        this.saveLocation = savePath.resolve("dims").resolve(uuid.toString());
         registryKey = RegistryKey.of(Registry.WORLD_KEY, new Identifier(MOD_ID, getName()));
         dimensionTypeKey = RegistryKey.of(Registry.DIMENSION_TYPE_KEY, new Identifier(MOD_ID, getName()));
-        dimensionType = createDimType(server);
+        parseAttributes(server, attributes);
+        this.attributes = List.copyOf(attributes);
     }
     
     /**
@@ -128,10 +119,12 @@ final class DimInfo{
         for(int i = 0; i < attributes.size(); i++){
             var currentAttribute = attributes.get(i);
             // If we don't have a controller and the attribute isn't a controller itself, it's garbage
-            if(!(currentAttribute instanceof ControllerDimAttribute controller)){
+            if(!(currentAttribute instanceof ControllerDimAttribute controllerAttribute)){
                 garbage.add(currentAttribute);
                 continue;
             }
+            var controller = controllerAttribute.getController();
+            
             // If the attribute is a controller and was already seen, it is also garbage
             var type = currentAttribute.getType();
             if(attributeMap.containsKey(type)){
@@ -141,7 +134,7 @@ final class DimInfo{
             
             // Now we are getting somewhere, we have a controller
             var appliedAttributes = new ArrayList<DimAttribute>();
-            appliedAttributes.add(controller); // Not a bug, required for parsing later
+            appliedAttributes.add(controllerAttribute); // Not a bug, required for parsing later
             
             // Iterate over attributes until we reach the end
             for(i++; i < attributes.size(); i++){
@@ -165,6 +158,8 @@ final class DimInfo{
         biomeSource = biomeSourcePair.object();
         instability += biomeSourcePair.integer();
         worldProps = createWorldProperties(server, attributeMap);
+    
+        dimensionType = createDimType(server, attributeMap);
     }
     
     /**
@@ -248,12 +243,13 @@ final class DimInfo{
      * TODO Make properties for hard coded values
      *
      * @param server The server instance
+     * @param attributeMap The user provided attributes
      * @return The new dimension type
      */
-    private DimensionType createDimType(MinecraftServer server){
+    private DimensionType createDimType(MinecraftServer server, Map<DimAttributeType, List<DimAttribute>> attributeMap){
         var type = DimensionType.create(
             OptionalLong.empty(),
-            true,
+            getBooleanAttribute(attributeMap, DimAttributeType.SKYLIGHT),
             false,
             false,
             false,
@@ -276,12 +272,57 @@ final class DimInfo{
     }
     
     /**
+     * Gets or generates a boolean value from a controller type.
+     *
+     * @param attributeMap The map of attributes
+     * @param type The type of controller
+     * @return True or false
+     */
+    private boolean getBooleanAttribute(Map<DimAttributeType, List<DimAttribute>> attributeMap, DimAttributeType type){
+        return Optional.ofNullable(attributeMap.get(type))
+            .map((list)->(BooleanDimAttribute)(list.isEmpty() ? null : list.get(1)))
+            .orElseGet(()->DIM_REGISTRY.getRandomAttribute(DimAttributeType.BOOLEAN))
+            .getBoolean();
+    }
+    
+    /**
+     * Leads the dimension type from a tag.
+     *
+     * @param server The service instance
+     * @param tag The dim type tag
+     * @return The new dim type
+     */
+    private DimensionType loadDimType(MinecraftServer server, NbtCompound tag){
+        var type = DimensionType.create(
+            OptionalLong.empty(),
+            tag.getBoolean("skylight"),
+            tag.getBoolean("ceiling"),
+            tag.getBoolean("ultrawarm"),
+            tag.getBoolean("natural"),
+            tag.getDouble("scale"),
+            tag.getBoolean("hasDragon"),
+            tag.getBoolean("piglinSafe"),
+            tag.getBoolean("bedWorks"),
+            tag.getBoolean("anchorWorks"),
+            tag.getBoolean("hasRaids"),
+            tag.getInt("minimumY"),
+            tag.getInt("height"),
+            tag.getInt("logicalHeight"),
+            HorizontalVoronoiBiomeAccessType.INSTANCE,
+            BlockTags.INFINIBURN_OVERWORLD.getId(),
+            DimensionType.OVERWORLD_ID,
+            0
+        );
+        server.getRegistryManager().getMutable(Registry.DIMENSION_TYPE_KEY).add(dimensionTypeKey, type, Lifecycle.stable());
+        return type;
+    }
+    
+    /**
      * Writes this dim info to an NBT tag for serialization.
      *
-     * @param root The root path of the save data
      * @return The compound tag
      */
-    NbtCompound toNbt(Path root){
+    NbtCompound toNbt(){
         var tag = new NbtCompound();
         
         tag.putUuid("uuid", uuid);
@@ -297,9 +338,23 @@ final class DimInfo{
         }
         tag.put("attributes", attributeList);
         
-        tag.putString("save", root.relativize(saveLocation).toString());
-        
         tag.put("props", worldProps.toNbt());
+    
+        var typeTag = new NbtCompound();
+        typeTag.putBoolean("skylight", dimensionType.hasSkyLight());
+        typeTag.putBoolean("ceiling", dimensionType.hasCeiling());
+        typeTag.putBoolean("ultrawarm", dimensionType.isUltrawarm());
+        typeTag.putBoolean("natural", dimensionType.isNatural());
+        typeTag.putDouble("scale", dimensionType.getCoordinateScale());
+        typeTag.putBoolean("hasDragon", dimensionType.hasEnderDragonFight());
+        typeTag.putBoolean("piglinSafe", dimensionType.isPiglinSafe());
+        typeTag.putBoolean("bedWorks", dimensionType.isBedWorking());
+        typeTag.putBoolean("anchorWorks", dimensionType.isRespawnAnchorWorking());
+        typeTag.putBoolean("hasRaids", dimensionType.hasRaids());
+        typeTag.putInt("minimumY", dimensionType.getMinimumY());
+        typeTag.putInt("height", dimensionType.getHeight());
+        typeTag.putInt("logicalHeight", dimensionType.getLogicalHeight());
+        tag.put("dimType", typeTag);
         
         return tag;
     }
