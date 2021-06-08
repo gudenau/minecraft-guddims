@@ -23,7 +23,9 @@ public enum DimAttributeType{
     DIGIT("digit"),
     BOOLEAN("boolean"),
     WEATHER("weather"),
-    SKYLIGHT("skylight");
+    SKYLIGHT("skylight"),
+    CELESTIAL("celestial"),
+    CELESTIAL_PROPERTY("celestial_property");
     
     private static final Map<Identifier, DimAttributeType> VALUE_MAP;
     

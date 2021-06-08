@@ -3,6 +3,7 @@ package net.gudenau.minecraft.dims.api.v0;
 import java.util.*;
 import net.gudenau.minecraft.dims.api.v0.attribute.DimAttribute;
 import net.gudenau.minecraft.dims.api.v0.attribute.DimAttributeType;
+import net.gudenau.minecraft.dims.api.v0.controller.ControllerType;
 import net.gudenau.minecraft.dims.api.v0.controller.DimController;
 import net.gudenau.minecraft.dims.impl.DimRegistryImpl;
 import net.minecraft.server.MinecraftServer;
@@ -142,4 +143,16 @@ public interface DimRegistry{
      * @param controller The controller to register
      */
     void registerController(DimController<?> controller);
+    
+    /**
+     * Gets a controller attribute, if it exists.
+     *
+     * @param type The type of controller
+     * @param id The id of the controller
+     * @param <T> FIXME
+     * @return The controller or empty
+     *
+     * @since 0.0.4
+     */
+    <T> Optional<T> getController(ControllerType type, Identifier id);
 }

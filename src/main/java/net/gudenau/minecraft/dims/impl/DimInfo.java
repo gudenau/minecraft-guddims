@@ -10,8 +10,10 @@ import net.gudenau.minecraft.dims.accessor.MinecraftServerAccessor;
 import net.gudenau.minecraft.dims.accessor.WorldAccessor;
 import net.gudenau.minecraft.dims.api.v0.DimRegistry;
 import net.gudenau.minecraft.dims.api.v0.attribute.*;
+import net.gudenau.minecraft.dims.api.v0.controller.CelestialDimController;
 import net.gudenau.minecraft.dims.api.v0.controller.WeatherDimController;
 import net.gudenau.minecraft.dims.api.v0.util.collection.ObjectIntPair;
+import net.gudenau.minecraft.dims.impl.controller.celestial.object.*;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.server.MinecraftServer;
@@ -42,7 +44,7 @@ import static net.gudenau.minecraft.dims.Dims.MOD_ID;
  *
  * @since 0.0.1
  */
-final class DimInfo{
+public final class DimInfo{
     private static final DimRegistry DIM_REGISTRY = DimRegistry.getInstance();
     private static final Random RANDOM = new Random(System.nanoTime() ^ 0xDEADC0DEDEADBEEFL);
     
@@ -56,6 +58,7 @@ final class DimInfo{
     private BiomeSource biomeSource;
     private DimensionWorldProperties worldProps;
     private DimensionType dimensionType;
+    private List<CelestialDimController.CelestialObject> celestialObjects;
     
     DimInfo(MinecraftServer server, NbtCompound tag){
         uuid = tag.getUuid("uuid");
@@ -72,6 +75,9 @@ final class DimInfo{
                 .orElseThrow(()->new RuntimeException("Unknown attribute: " + attributeTag.getString("attribute"))));
         }
         this.attributes = Collections.unmodifiableList(attributes);
+    
+        registryKey = RegistryKey.of(Registry.WORLD_KEY, new Identifier(MOD_ID, getName()));
+        dimensionTypeKey = RegistryKey.of(Registry.DIMENSION_TYPE_KEY, new Identifier(MOD_ID, getName()));
         
         //TODO Make this NBT based
         parseAttributes(server, attributes);
@@ -84,8 +90,6 @@ final class DimInfo{
             server.getGameRules()
         );
         
-        registryKey = RegistryKey.of(Registry.WORLD_KEY, new Identifier(MOD_ID, getName()));
-        dimensionTypeKey = RegistryKey.of(Registry.DIMENSION_TYPE_KEY, new Identifier(MOD_ID, getName()));
         // create(OptionalLong.empty(), true, false, false, true, 1.0D, false, false, true, false, true, 0, 256, 256, HorizontalVoronoiBiomeAccessType.INSTANCE, BlockTags.INFINIBURN_OVERWORLD.getId(), OVERWORLD_ID, 0.0F);
         dimensionType = loadDimType(server, tag.getCompound("dimType"));
     }
@@ -116,6 +120,8 @@ final class DimInfo{
         
         // A somewhat messy feeling way to take the list an turn it into a map
         Map<DimAttributeType, List<DimAttribute>> attributeMap = new Object2ObjectOpenHashMap<>();
+        Map<DimAttributeType, List<List<DimAttribute>>> attributeMultiMap = new Object2ObjectOpenHashMap<>();
+        
         for(int i = 0; i < attributes.size(); i++){
             var currentAttribute = attributes.get(i);
             // If we don't have a controller and the attribute isn't a controller itself, it's garbage
@@ -126,14 +132,19 @@ final class DimInfo{
             var controller = controllerAttribute.getController();
             
             // If the attribute is a controller and was already seen, it is also garbage
+            var appliedAttributes = new ArrayList<DimAttribute>();
             var type = currentAttribute.getType();
-            if(attributeMap.containsKey(type)){
-                garbage.add(currentAttribute);
-                continue;
+            if(controller.areDuplicatesAllowed()){
+                attributeMultiMap.computeIfAbsent(type, (t)->new ArrayList<>()).add(appliedAttributes);
+            }else{
+                if(attributeMap.containsKey(type)){
+                    garbage.add(currentAttribute);
+                    continue;
+                }
+                attributeMap.put(type, appliedAttributes);
             }
             
             // Now we are getting somewhere, we have a controller
-            var appliedAttributes = new ArrayList<DimAttribute>();
             appliedAttributes.add(controllerAttribute); // Not a bug, required for parsing later
             
             // Iterate over attributes until we reach the end
@@ -147,8 +158,6 @@ final class DimInfo{
                     break;
                 }
             }
-            // Record the controller and it's attributes
-            attributeMap.put(type, appliedAttributes);
         }
     
         long instability = garbage.size();
@@ -160,6 +169,45 @@ final class DimInfo{
         worldProps = createWorldProperties(server, attributeMap);
     
         dimensionType = createDimType(server, attributeMap);
+    
+        celestialObjects = createCelestialObjects(attributeMultiMap.get(DimAttributeType.CELESTIAL));
+    }
+    
+    /**
+     * Creates all of the celestial objects for a dimension from a list of attributes.
+     *
+     * @param attributeListList The attributes to parse
+     * @return The list of objects
+     *
+     * @since 0.0.4
+     */
+    private List<CelestialDimController.CelestialObject> createCelestialObjects(List<List<DimAttribute>> attributeListList){
+        if(attributeListList == null || attributeListList.isEmpty()){
+            if(random.nextInt(16) == 0){
+                return List.of(new EndSkyObject(OptionalInt.empty()));
+            }else{
+                return List.of(
+                    new SunObject(
+                        OptionalInt.empty(),
+                        OptionalInt.empty(),
+                        OptionalInt.empty(),
+                        OptionalInt.empty()
+                    ),
+                    new MoonObject(
+                        OptionalInt.empty(),
+                        OptionalInt.empty(),
+                        OptionalInt.empty(),
+                        OptionalInt.empty()
+                    ),
+                    new StarsObject(OptionalInt.empty())
+                );
+            }
+        }
+        
+        //TODO Garbage
+        return attributeListList.stream()
+            .map((attributes)->((CelestialDimAttribute)attributes.remove(0)).getController().createCelestialObject(attributes).object())
+            .toList();
     }
     
     /**
@@ -313,7 +361,10 @@ final class DimInfo{
             DimensionType.OVERWORLD_ID,
             0
         );
-        server.getRegistryManager().getMutable(Registry.DIMENSION_TYPE_KEY).add(dimensionTypeKey, type, Lifecycle.stable());
+        //TODO Change to `add` when this is NBT based.
+        var registry = server.getRegistryManager().getMutable(Registry.DIMENSION_TYPE_KEY);
+        var id = registry.getRawId(registry.get(dimensionTypeKey));
+        registry.set(id, dimensionTypeKey, type, Lifecycle.stable());
         return type;
     }
     
@@ -442,5 +493,27 @@ final class DimInfo{
      */
     public RegistryKey<World> getRegistryKey(){
         return registryKey;
+    }
+    
+    /**
+     * Gets the celestial objects for this dimension.
+     *
+     * @return The list of celestial objects
+     *
+     * @since 0.0.4
+     */
+    public List<CelestialDimController.CelestialObject> getCelestialObjects(){
+        return celestialObjects;
+    }
+    
+    /**
+     * Gets the key for the type of this dimension.
+     *
+     * @return The dimension type key
+     *
+     * @since 0.0.4
+     */
+    public RegistryKey<DimensionType> getDimensionTypeKey(){
+        return dimensionTypeKey;
     }
 }

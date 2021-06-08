@@ -1,6 +1,5 @@
 package net.gudenau.minecraft.dims.api.v0.attribute;
 
-import java.util.List;
 
 /**
  * An attribute that represents a single base 10 numerical digit, 0-9
@@ -15,23 +14,26 @@ public interface DigitDimAttribute extends DimAttribute{
      */
     int getValue();
     
+    /**
+     * Gets what type of digit this attribute is.
+     *
+     * @since 0.0.4
+     *
+     * @return The digit type.
+     */
+    DigitType getDigitType();
+    
     @Override
     default DimAttributeType getType(){
         return DimAttributeType.DIGIT;
     }
     
     /**
-     * A helper method to get an integer from a list of attributes.
+     * The types of digit attributes.
      *
-     * @param attributes The digit attributes to parse
-     * @return The parsed integer
+     * @since 0.0.4
      */
-    static int getIntValue(List<DigitDimAttribute> attributes){
-        int value = 0;
-        for(DigitDimAttribute attribute : attributes){
-            value *= 10;
-            value += attribute.getValue();
-        }
-        return value;
+    enum DigitType{
+        NUMERIC, DECIMAL
     }
 }

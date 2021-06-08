@@ -5,14 +5,12 @@ import net.gudenau.minecraft.dims.api.v0.controller.WeatherDimController;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.util.Identifier;
 
-import static net.gudenau.minecraft.dims.Dims.MOD_ID;
-
 /**
  * Used to hold the immutable weather controllers, clear, rain and thunder.
  *
  * @since 0.0.3
  */
-public class BasicWeatherController implements WeatherDimController{
+public final class BasicWeatherController implements WeatherDimController{
     private final WeatherController controller;
     
     public BasicWeatherController(WeatherController controller){

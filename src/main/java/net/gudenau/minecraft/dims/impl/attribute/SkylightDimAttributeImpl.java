@@ -9,7 +9,7 @@ import net.minecraft.util.Identifier;
  *
  * @since 0.0.3
  */
-public class SkylightDimAttributeImpl implements SkylightDimAttribute{
+public final class SkylightDimAttributeImpl implements SkylightDimAttribute{
     /**
      * The controller instance.
      */

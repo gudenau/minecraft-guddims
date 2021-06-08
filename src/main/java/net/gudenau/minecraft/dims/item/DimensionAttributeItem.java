@@ -85,6 +85,8 @@ public final class DimensionAttributeItem extends Item{
             case BOOLEAN -> Dims.Items.DIMENSION_ATTRIBUTE_BOOLEAN;
             case WEATHER -> Dims.Items.DIMENSION_ATTRIBUTE_WEATHER;
             case SKYLIGHT -> Dims.Items.DIMENSION_ATTRIBUTE_SKYLIGHT;
+            case CELESTIAL -> Dims.Items.DIMENSION_ATTRIBUTE_CELESTIAL;
+            case CELESTIAL_PROPERTY -> Dims.Items.DIMENSION_ATTRIBUTE_CELESTIAL_PROPERTY;
         });
         var tag = stack.getOrCreateTag();
         tag.putString("AttributeKind", attribute.getType().getId().toString());

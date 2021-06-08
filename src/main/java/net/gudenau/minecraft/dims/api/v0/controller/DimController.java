@@ -36,4 +36,15 @@ public interface DimController<T extends DimAttribute>{
      * @return True if valid, false if not
      */
     boolean isPropertyValid(DimAttribute attribute);
+    
+    /**
+     * Checks if this controller allows more than a single instance to exist.
+     *
+     * @return True if there can be duplicates of this controller
+     *
+     * @since 0.0.4
+     */
+    default boolean areDuplicatesAllowed(){
+        return false;
+    }
 }

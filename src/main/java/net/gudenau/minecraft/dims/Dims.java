@@ -6,6 +6,7 @@ import net.fabricmc.fabric.api.client.itemgroup.FabricItemGroupBuilder;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.fabric.api.object.builder.v1.block.FabricBlockSettings;
 import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder;
 import net.fabricmc.fabric.api.tag.TagRegistry;
@@ -18,6 +19,7 @@ import net.gudenau.minecraft.dims.block.entity.DimensionBuilderBlockEntity;
 import net.gudenau.minecraft.dims.block.entity.PortalBlockEntity;
 import net.gudenau.minecraft.dims.block.entity.PortalReceptacleBlockEntity;
 import net.gudenau.minecraft.dims.impl.DimRegistryImpl;
+import net.gudenau.minecraft.dims.impl.client.SkyRegistry;
 import net.gudenau.minecraft.dims.impl.controller.DefaultControllers;
 import net.gudenau.minecraft.dims.item.DimensionAnchorItem;
 import net.gudenau.minecraft.dims.item.DimensionAttributeItem;
@@ -89,6 +91,11 @@ public final class Dims implements ModInitializer, DimsInitializer{
             }
         });
         ServerTickEvents.START_SERVER_TICK.register(DimRegistryImpl.INSTANCE::addWorlds);
+        ServerPlayConnectionEvents.JOIN.register((handler, sender, server)->{
+            for(var dimension : DimRegistryImpl.INSTANCE.getDimensions()){
+                sender.sendPacket(SkyRegistry.createPacket(dimension));
+            }
+        });
     }
     
     public static final class Blocks{
@@ -155,9 +162,17 @@ public final class Dims implements ModInitializer, DimsInitializer{
             new Identifier(MOD_ID, "biomes"), ()->
                 DimensionAttributeItem.getStack(DimRegistry.getInstance().getRandomAttribute(DimAttributeType.BIOME))
         );
+        public static final ItemGroup CELESTIAL_GROUP = FabricItemGroupBuilder.build(
+            new Identifier(MOD_ID, "celestial"), ()->
+                DimensionAttributeItem.getStack(DimRegistry.getInstance().getRandomAttribute(
+                    DimAttributeType.CELESTIAL, DimAttributeType.CELESTIAL_PROPERTY
+                ))
+        );
         public static final ItemGroup CONTROLLER_GROUP = FabricItemGroupBuilder.build(
             new Identifier(MOD_ID, "controllers"), ()->
-                DimensionAttributeItem.getStack(DimRegistry.getInstance().getRandomAttribute(DimAttributeType.BIOME_CONTROLLER))
+                DimensionAttributeItem.getStack(DimRegistry.getInstance().getRandomAttribute(
+                    DimAttributeType.BIOME_CONTROLLER, DimAttributeType.WEATHER
+                ))
         );
         public static final ItemGroup BLOCK_GROUP = FabricItemGroupBuilder.build(
             new Identifier(MOD_ID, "blocks"), ()->
@@ -178,6 +193,8 @@ public final class Dims implements ModInitializer, DimsInitializer{
         public static final Item DIMENSION_ATTRIBUTE_BIOME_CONTROLLER = new DimensionAttributeItem(DimAttributeType.BIOME_CONTROLLER, new FabricItemSettings().group(CONTROLLER_GROUP));
         public static final Item DIMENSION_ATTRIBUTE_BOOLEAN = new DimensionAttributeItem(DimAttributeType.BOOLEAN, new FabricItemSettings().group(MISC_GROUP));
         public static final Item DIMENSION_ATTRIBUTE_BLOCK = new DimensionAttributeItem(DimAttributeType.BLOCK, new FabricItemSettings().group(BLOCK_GROUP));
+        public static final Item DIMENSION_ATTRIBUTE_CELESTIAL = new DimensionAttributeItem(DimAttributeType.CELESTIAL, new FabricItemSettings().group(CELESTIAL_GROUP));
+        public static final Item DIMENSION_ATTRIBUTE_CELESTIAL_PROPERTY = new DimensionAttributeItem(DimAttributeType.CELESTIAL_PROPERTY, new FabricItemSettings().group(CELESTIAL_GROUP));
         public static final Item DIMENSION_ATTRIBUTE_COLOR = new DimensionAttributeItem(DimAttributeType.COLOR, new FabricItemSettings().group(MISC_GROUP));
         public static final Item DIMENSION_ATTRIBUTE_DIGIT = new DimensionAttributeItem(DimAttributeType.DIGIT, new FabricItemSettings().group(MISC_GROUP));
         public static final Item DIMENSION_ATTRIBUTE_FLUID = new DimensionAttributeItem(DimAttributeType.FLUID, new FabricItemSettings().group(FLUID_GROUP));
@@ -191,7 +208,7 @@ public final class Dims implements ModInitializer, DimsInitializer{
         public static final BlockItem DIMENSION_BUILDER = new BlockItem(Blocks.DIMENSION_BUILDER, new FabricItemSettings().group(GROUP));
         public static final BlockItem PRISCILLITE = new BlockItem(Blocks.PRISCILLITE, new FabricItemSettings().group(GROUP));
         public static final BlockItem PORTAL_RECEPTACLE = new BlockItem(Blocks.PORTAL_RECEPTACLE, new FabricItemSettings().group(GROUP));
-        
+    
         private static void register(String name, Item item){
             Registry.register(Registry.ITEM, new Identifier(MOD_ID, name), item);
         }
@@ -205,6 +222,8 @@ public final class Dims implements ModInitializer, DimsInitializer{
             register("dimension_attribute_biome_controller", DIMENSION_ATTRIBUTE_BIOME_CONTROLLER);
             register("dimension_attribute_boolean", DIMENSION_ATTRIBUTE_BOOLEAN);
             register("dimension_attribute_block", DIMENSION_ATTRIBUTE_BLOCK);
+            register("dimension_attribute_celestial", DIMENSION_ATTRIBUTE_CELESTIAL);
+            register("dimension_attribute_celestial_property", DIMENSION_ATTRIBUTE_CELESTIAL_PROPERTY);
             register("dimension_attribute_color", DIMENSION_ATTRIBUTE_COLOR);
             register("dimension_attribute_digit", DIMENSION_ATTRIBUTE_DIGIT);
             register("dimension_attribute_fluid", DIMENSION_ATTRIBUTE_FLUID);
@@ -230,5 +249,6 @@ public final class Dims implements ModInitializer, DimsInitializer{
     
     public static final class Packets{
         public static final Identifier REGISTER_DIM = new Identifier(MOD_ID, "register_dim");
+        public static final Identifier REGISTER_SKY = new Identifier(MOD_ID, "register_sky");
     }
 }

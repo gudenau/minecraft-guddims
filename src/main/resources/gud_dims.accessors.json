@@ -12,7 +12,8 @@
   ],
   "client": [
     "client.NativeImageAccessor",
-    "client.SpriteAccessor"
+    "client.SpriteAccessor",
+    "client.WorldRendererAccessor"
   ],
   "injectors": {
     "defaultRequire": 1

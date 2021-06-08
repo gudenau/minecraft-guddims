@@ -20,6 +20,7 @@ import net.gudenau.minecraft.dims.api.v0.*;
 import net.gudenau.minecraft.dims.api.v0.attribute.*;
 import net.gudenau.minecraft.dims.api.v0.controller.*;
 import net.gudenau.minecraft.dims.impl.attribute.*;
+import net.gudenau.minecraft.dims.impl.client.SkyRegistry;
 import net.minecraft.block.Blocks;
 import net.minecraft.item.AirBlockItem;
 import net.minecraft.item.BlockItem;
@@ -74,6 +75,12 @@ public final class DimRegistryImpl implements DimRegistry{
     private final List<SkylightDimAttribute> skylightDimAttributeList = new ArrayList<>();
     private final Map<Identifier, SkylightDimAttribute> skylightDimAttributeMap = new HashMap<>();
     
+    private final List<CelestialDimAttribute> celestialDimAttributeList = new ArrayList<>();
+    private final Map<Identifier, CelestialDimAttribute> celestialDimAttributeMap = new HashMap<>();
+    
+    private List<CelestialPropertyDimAttribute> celestialPropertyDimAttributeList;
+    private Map<Identifier, CelestialPropertyDimAttribute> celestialPropertyDimAttributeMap;
+    
     private final Set<DimInfo> pendingDims = new HashSet<>();
     
     @SuppressWarnings({"unchecked", "RedundantCast"})
@@ -90,6 +97,8 @@ public final class DimRegistryImpl implements DimRegistry{
             case BOOLEAN -> booleanDimAttributeList;
             case WEATHER -> Collections.unmodifiableList(weatherDimAttributeList);
             case SKYLIGHT -> Collections.unmodifiableList(skylightDimAttributeList);
+            case CELESTIAL -> Collections.unmodifiableList(celestialDimAttributeList);
+            case CELESTIAL_PROPERTY -> celestialPropertyDimAttributeList;
         };
     }
     
@@ -117,6 +126,8 @@ public final class DimRegistryImpl implements DimRegistry{
             case BOOLEAN -> booleanDimAttributeMap;
             case WEATHER -> Collections.unmodifiableMap(weatherDimAttributeMap);
             case SKYLIGHT -> Collections.unmodifiableMap(skylightDimAttributeMap);
+            case CELESTIAL -> Collections.unmodifiableMap(celestialDimAttributeMap);
+            case CELESTIAL_PROPERTY -> celestialPropertyDimAttributeMap;
         }).get(attribute));
     }
     
@@ -137,7 +148,9 @@ public final class DimRegistryImpl implements DimRegistry{
         var buffer = PacketByteBufs.create();
         buffer.writeIdentifier(info.getRegistryKey().getValue());
         
-        server.getPlayerManager().sendToAll(ServerPlayNetworking.createS2CPacket(Dims.Packets.REGISTER_DIM, buffer));
+        var playerManager = server.getPlayerManager();
+        playerManager.sendToAll(ServerPlayNetworking.createS2CPacket(Dims.Packets.REGISTER_DIM, buffer));
+        playerManager.sendToAll(SkyRegistry.createPacket(info));
         
         return Optional.of(info.getUuid());
     }
@@ -220,7 +233,26 @@ public final class DimRegistryImpl implements DimRegistry{
                 }
                 skylightDimAttributeList.add(attribute);
             }
+            case CELESTIAL -> {
+                var attribute = new CelestialDimAttributeImpl((CelestialDimController)controller);
+                if(celestialDimAttributeMap.put(attribute.getId(), attribute) != null){
+                    throw new IllegalStateException("Celestial controller " + attribute.getId() + " was already registered");
+                }
+                celestialDimAttributeList.add(attribute);
+            }
         }
+    }
+    
+    // RedundantCast is because of a javac bug
+    @SuppressWarnings({"unchecked", "RedundantCast"})
+    @Override
+    public <T> Optional<T> getController(ControllerType type, Identifier id){
+        return Optional.ofNullable((T)(Object)switch(type){
+            case BIOME -> biomeControllerAttributeMap.get(id);
+            case WEATHER -> weatherDimAttributeMap.get(id);
+            case SKYLIGHT -> skylightDimAttributeMap.get(id);
+            case CELESTIAL -> celestialDimAttributeMap.get(id);
+        });
     }
     
     public void init(MinecraftServer server){
@@ -346,8 +378,11 @@ public final class DimRegistryImpl implements DimRegistry{
             .toList();
         colorAttributeMap = toMap(colorAttributeList);
     
-        digitDimAttributeList = IntStream.range(0, 10)
-            .mapToObj(DigitDimAttributeImpl::new)
+        digitDimAttributeList = Stream.of(
+                IntStream.range(0, 10).mapToObj(DigitDimAttributeImpl::new),
+                Stream.of(new DigitDimAttributeImpl(DigitDimAttribute.DigitType.DECIMAL))
+            )
+            .flatMap((stream)->stream)
             .sorted(Comparator.comparing(DimAttribute::getId))
             .map((attribute)->(DigitDimAttribute)attribute)
             .toList();
@@ -358,6 +393,13 @@ public final class DimRegistryImpl implements DimRegistry{
             new BooleanDimAttributeImpl(true)
         );
         booleanDimAttributeMap = toMap(booleanDimAttributeList);
+        
+        celestialPropertyDimAttributeList = Stream.of(CelestialPropertyDimAttribute.Property.values())
+            .map(CelestialPropertyDimAttributeImpl::new)
+            .sorted(Comparator.comparing(DimAttribute::getId))
+            .map((attribute)->(CelestialPropertyDimAttribute)attribute)
+            .toList();
+        celestialPropertyDimAttributeMap = toMap(celestialPropertyDimAttributeList);
     }
     
     private static <T extends DimAttribute> Map<Identifier, T> toMap(List<T> attributes){
@@ -366,5 +408,9 @@ public final class DimRegistryImpl implements DimRegistry{
             .map((attribute)->Map.entry(attribute.getId(), attribute))
             .forEach(builder::put);
         return builder.build();
+    }
+    
+    public Collection<DimInfo> getDimensions(){
+        return Collections.unmodifiableCollection(dimensions.values());
     }
 }

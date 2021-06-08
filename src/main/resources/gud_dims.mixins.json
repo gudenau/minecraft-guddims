@@ -6,11 +6,13 @@
   "mixins": [
     "EntityMixin",
     "MinecraftServerMixin",
-    "ServerPlayerEntityMixin",
-    "client.ResourceReloadLoggerMixin"
+    "ServerPlayerEntityMixin"
   ],
   "client": [
-    "client.TooltipComponentMixin"
+    "client.ResourceReloadLoggerMixin",
+    "client.SkyPropertiesMixin",
+    "client.TooltipComponentMixin",
+    "client.WorldRendererMixin"
   ],
   "injectors": {
     "defaultRequire": 1

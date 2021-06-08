@@ -3,6 +3,8 @@ package net.gudenau.minecraft.dims;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.fabricmc.fabric.api.client.networking.v1.ClientLoginConnectionEvents;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.client.rendereregistry.v1.BlockEntityRendererRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.ColorProviderRegistry;
@@ -11,6 +13,7 @@ import net.gudenau.minecraft.dims.api.v0.attribute.BlockDimAttribute;
 import net.gudenau.minecraft.dims.api.v0.attribute.FluidDimAttribute;
 import net.gudenau.minecraft.dims.client.BlockColorCache;
 import net.gudenau.minecraft.dims.client.renderer.blockentity.PortalBlockEntityRenderer;
+import net.gudenau.minecraft.dims.impl.client.SkyRegistry;
 import net.gudenau.minecraft.dims.item.DimensionAttributeItem;
 import net.minecraft.client.color.world.BiomeColors;
 import net.minecraft.util.registry.Registry;
@@ -28,13 +31,21 @@ public final class DimsClient implements ClientModInitializer{
         registerBlockEntityRenderers();
         registerItemColors();
         registerPackets();
+        registerEventHandlers();
+    }
+    
+    private void registerEventHandlers(){
+        ClientPlayConnectionEvents.DISCONNECT.register((handler, client)->SkyRegistry.reset());
+        ClientLoginConnectionEvents.DISCONNECT.register((handler, client)->SkyRegistry.reset());
     }
     
     private void registerPackets(){
-        ClientPlayNetworking.registerGlobalReceiver(Dims.Packets.REGISTER_DIM, (client, handler, buffer, sender)->{
-            client.getNetworkHandler().getWorldKeys().add(RegistryKey.of(Registry.WORLD_KEY, buffer.readIdentifier()));
-            //Registry.DIMENSION_TYPE_KEY
-        });
+        ClientPlayNetworking.registerGlobalReceiver(Dims.Packets.REGISTER_DIM, (client, handler, buffer, sender)->
+            client.getNetworkHandler().getWorldKeys().add(RegistryKey.of(Registry.WORLD_KEY, buffer.readIdentifier()))
+        );
+        ClientPlayNetworking.registerGlobalReceiver(Dims.Packets.REGISTER_SKY, (client, handler, buffer, sender)->
+            SkyRegistry.getInstance().registerSky(buffer)
+        );
     }
     
     private void registerBlockEntityRenderers(){
