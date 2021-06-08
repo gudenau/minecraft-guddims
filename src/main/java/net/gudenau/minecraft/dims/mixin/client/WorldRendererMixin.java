@@ -27,9 +27,10 @@ public abstract class WorldRendererMixin{
         at = @At("HEAD"),
         cancellable = true
     )
-    private void renderSky(MatrixStack matrixStack, Matrix4f projection, float tickDelta, CallbackInfo ci){
+    private void renderSky(MatrixStack matrixStack, Matrix4f projection, float tickDelta, Runnable runnable, CallbackInfo ci){
         var skyProps = client.world.getSkyProperties();
         if(skyProps instanceof DimensionSkyProperties dimSkyPros){
+            runnable.run();
             dimSkyPros.render(matrixStack, projection, tickDelta, (WorldRenderer)(Object)this);
             ci.cancel();
         }
