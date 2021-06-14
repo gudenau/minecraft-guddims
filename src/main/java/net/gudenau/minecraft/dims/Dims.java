@@ -189,17 +189,7 @@ public final class Dims implements ModInitializer, DimsInitializer{
                 ))
         );
         
-        public static final Item DIMENSION_ATTRIBUTE_BIOME = new DimensionAttributeItem(DimAttributeType.BIOME, new FabricItemSettings().group(BIOME_GROUP));
-        public static final Item DIMENSION_ATTRIBUTE_BIOME_CONTROLLER = new DimensionAttributeItem(DimAttributeType.BIOME_CONTROLLER, new FabricItemSettings().group(CONTROLLER_GROUP));
-        public static final Item DIMENSION_ATTRIBUTE_BOOLEAN = new DimensionAttributeItem(DimAttributeType.BOOLEAN, new FabricItemSettings().group(MISC_GROUP));
-        public static final Item DIMENSION_ATTRIBUTE_BLOCK = new DimensionAttributeItem(DimAttributeType.BLOCK, new FabricItemSettings().group(BLOCK_GROUP));
-        public static final Item DIMENSION_ATTRIBUTE_CELESTIAL = new DimensionAttributeItem(DimAttributeType.CELESTIAL, new FabricItemSettings().group(CELESTIAL_GROUP));
-        public static final Item DIMENSION_ATTRIBUTE_CELESTIAL_PROPERTY = new DimensionAttributeItem(DimAttributeType.CELESTIAL_PROPERTY, new FabricItemSettings().group(CELESTIAL_GROUP));
-        public static final Item DIMENSION_ATTRIBUTE_COLOR = new DimensionAttributeItem(DimAttributeType.COLOR, new FabricItemSettings().group(MISC_GROUP));
-        public static final Item DIMENSION_ATTRIBUTE_DIGIT = new DimensionAttributeItem(DimAttributeType.DIGIT, new FabricItemSettings().group(MISC_GROUP));
-        public static final Item DIMENSION_ATTRIBUTE_FLUID = new DimensionAttributeItem(DimAttributeType.FLUID, new FabricItemSettings().group(FLUID_GROUP));
-        public static final Item DIMENSION_ATTRIBUTE_SKYLIGHT = new DimensionAttributeItem(DimAttributeType.SKYLIGHT, new FabricItemSettings().group(CONTROLLER_GROUP));
-        public static final Item DIMENSION_ATTRIBUTE_WEATHER = new DimensionAttributeItem(DimAttributeType.WEATHER, new FabricItemSettings().group(CONTROLLER_GROUP));
+        public static final Item DIMENSION_ATTRIBUTE = new DimensionAttributeItem(new FabricItemSettings());
         
         public static final Item DIMENSION_ANCHOR = new DimensionAnchorItem(new FabricItemSettings().group(GROUP).maxCount(1));
         public static final Item DIMENSION_TOKEN = new DimensionTokenItem(new FabricItemSettings().group(GROUP).maxCount(1));
@@ -218,17 +208,7 @@ public final class Dims implements ModInitializer, DimsInitializer{
         }
         
         private static void init(){
-            register("dimension_attribute_biome", DIMENSION_ATTRIBUTE_BIOME);
-            register("dimension_attribute_biome_controller", DIMENSION_ATTRIBUTE_BIOME_CONTROLLER);
-            register("dimension_attribute_boolean", DIMENSION_ATTRIBUTE_BOOLEAN);
-            register("dimension_attribute_block", DIMENSION_ATTRIBUTE_BLOCK);
-            register("dimension_attribute_celestial", DIMENSION_ATTRIBUTE_CELESTIAL);
-            register("dimension_attribute_celestial_property", DIMENSION_ATTRIBUTE_CELESTIAL_PROPERTY);
-            register("dimension_attribute_color", DIMENSION_ATTRIBUTE_COLOR);
-            register("dimension_attribute_digit", DIMENSION_ATTRIBUTE_DIGIT);
-            register("dimension_attribute_fluid", DIMENSION_ATTRIBUTE_FLUID);
-            register("dimension_attribute_skylight", DIMENSION_ATTRIBUTE_SKYLIGHT);
-            register("dimension_attribute_weather", DIMENSION_ATTRIBUTE_WEATHER);
+            register("dimension_attribute", DIMENSION_ATTRIBUTE);
             
             register("dimension_anchor", DIMENSION_ANCHOR);
             register("dimension_token", DIMENSION_TOKEN);

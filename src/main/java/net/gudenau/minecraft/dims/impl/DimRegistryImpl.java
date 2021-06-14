@@ -83,11 +83,11 @@ public final class DimRegistryImpl implements DimRegistry{
     
     private final Set<DimInfo> pendingDims = new HashSet<>();
     
-    @SuppressWarnings({"unchecked", "RedundantCast"})
+    @SuppressWarnings({"unchecked"})
     @Override
     public <T extends DimAttribute> List<T> getAttributes(DimAttributeType type){
         ensureInit();
-        return (List<T>)switch(type){
+        var result = (List<T>)switch(type){
             case BLOCK -> blockAttributeList;
             case FLUID -> fluidAttributeList;
             case COLOR -> colorAttributeList;
@@ -100,6 +100,7 @@ public final class DimRegistryImpl implements DimRegistry{
             case CELESTIAL -> Collections.unmodifiableList(celestialDimAttributeList);
             case CELESTIAL_PROPERTY -> celestialPropertyDimAttributeList;
         };
+        return result == null ? List.of() : result;
     }
     
     @Override

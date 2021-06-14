@@ -25,11 +25,9 @@ import org.jetbrains.annotations.Nullable;
  * @since 0.0.1
  */
 public final class DimensionAttributeItem extends Item{
-    private final DimAttributeType type;
     
-    public DimensionAttributeItem(DimAttributeType type, Settings settings){
+    public DimensionAttributeItem(Settings settings){
         super(settings);
-        this.type = type;
     }
     
     @Override
@@ -40,8 +38,39 @@ public final class DimensionAttributeItem extends Item{
     @Override
     public void appendStacks(ItemGroup group, DefaultedList<ItemStack> stacks){
         // Since it is once instance of an item for a type, we need custom rules for the tabs.
-        if(getGroup() == group){
-            DimRegistry.getInstance().getAttributes(type).stream()
+        if(group == Dims.Items.BIOME_GROUP){
+            DimRegistry.getInstance().getAttributes(DimAttributeType.BIOME).stream()
+                .map(DimensionAttributeItem::getStack)
+                .forEach(stacks::add);
+        }else if(group == Dims.Items.CONTROLLER_GROUP){
+            DimRegistry.getInstance().getAttributes(
+                DimAttributeType.BIOME_CONTROLLER,
+                DimAttributeType.SKYLIGHT,
+                DimAttributeType.WEATHER
+            ).stream()
+                .map(DimensionAttributeItem::getStack)
+                .forEach(stacks::add);
+        }else if(group == Dims.Items.MISC_GROUP){
+            DimRegistry.getInstance().getAttributes(
+                DimAttributeType.BOOLEAN,
+                DimAttributeType.COLOR,
+                DimAttributeType.DIGIT
+            ).stream()
+                .map(DimensionAttributeItem::getStack)
+                .forEach(stacks::add);
+        }else if(group == Dims.Items.BLOCK_GROUP){
+            DimRegistry.getInstance().getAttributes(DimAttributeType.BLOCK).stream()
+                .map(DimensionAttributeItem::getStack)
+                .forEach(stacks::add);
+        }else if(group == Dims.Items.CELESTIAL_GROUP){
+            DimRegistry.getInstance().getAttributes(
+                DimAttributeType.CELESTIAL,
+                DimAttributeType.CELESTIAL_PROPERTY
+            ).stream()
+                .map(DimensionAttributeItem::getStack)
+                .forEach(stacks::add);
+        }else if(group == Dims.Items.FLUID_GROUP){
+            DimRegistry.getInstance().getAttributes(DimAttributeType.FLUID).stream()
                 .map(DimensionAttributeItem::getStack)
                 .forEach(stacks::add);
         }
@@ -75,19 +104,7 @@ public final class DimensionAttributeItem extends Item{
      * @return The created stack
      */
     public static ItemStack getStack(DimAttribute attribute){
-        var stack = new ItemStack(switch(attribute.getType()){
-            case BLOCK -> Dims.Items.DIMENSION_ATTRIBUTE_BLOCK;
-            case FLUID -> Dims.Items.DIMENSION_ATTRIBUTE_FLUID;
-            case COLOR -> Dims.Items.DIMENSION_ATTRIBUTE_COLOR;
-            case BIOME -> Dims.Items.DIMENSION_ATTRIBUTE_BIOME;
-            case BIOME_CONTROLLER -> Dims.Items.DIMENSION_ATTRIBUTE_BIOME_CONTROLLER;
-            case DIGIT -> Dims.Items.DIMENSION_ATTRIBUTE_DIGIT;
-            case BOOLEAN -> Dims.Items.DIMENSION_ATTRIBUTE_BOOLEAN;
-            case WEATHER -> Dims.Items.DIMENSION_ATTRIBUTE_WEATHER;
-            case SKYLIGHT -> Dims.Items.DIMENSION_ATTRIBUTE_SKYLIGHT;
-            case CELESTIAL -> Dims.Items.DIMENSION_ATTRIBUTE_CELESTIAL;
-            case CELESTIAL_PROPERTY -> Dims.Items.DIMENSION_ATTRIBUTE_CELESTIAL_PROPERTY;
-        });
+        var stack = new ItemStack(Dims.Items.DIMENSION_ATTRIBUTE);
         var tag = stack.getOrCreateTag();
         tag.putString("AttributeKind", attribute.getType().getId().toString());
         tag.putString("Attribute", attribute.getId().toString());
