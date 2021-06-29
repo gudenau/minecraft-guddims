@@ -7,9 +7,7 @@ import java.util.stream.Stream;
 import net.gudenau.minecraft.dims.api.v0.controller.*;
 import net.gudenau.minecraft.dims.impl.controller.biome.CheckerboardBiomeDimControllerImpl;
 import net.gudenau.minecraft.dims.impl.controller.biome.SingleBiomeDimControllerImpl;
-import net.gudenau.minecraft.dims.impl.controller.celestial.controller.EndSkyController;
-import net.gudenau.minecraft.dims.impl.controller.celestial.controller.MoonController;
-import net.gudenau.minecraft.dims.impl.controller.celestial.controller.SunController;
+import net.gudenau.minecraft.dims.impl.controller.celestial.controller.*;
 import net.gudenau.minecraft.dims.impl.controller.weather.BasicWeatherController;
 import net.gudenau.minecraft.dims.impl.controller.weather.VanillaWeatherController;
 import net.gudenau.minecraft.dims.impl.weather.ClearWeather;
@@ -75,7 +73,8 @@ public final class DefaultControllers{
         return Set.of(
             new SunController(),
             new MoonController(),
-            new EndSkyController()
+            new EndSkyController(),
+            new StarsController()
         );
     }
 }

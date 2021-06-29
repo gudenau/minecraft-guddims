@@ -1,10 +1,10 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "gud_dims:item/attribute/biome/foliage",
-    "layer1": "gud_dims:item/attribute/biome/grass",
-    "layer2": "gud_dims:item/attribute/biome/water",
-    "layer3": "gud_dims:item/attribute/biome/sky",
-    "layer4": "gud_dims:item/attribute/biome/base"
+    "layer0": "gud_dims:item/dimension_attribute/biome/foliage",
+    "layer1": "gud_dims:item/dimension_attribute/biome/grass",
+    "layer2": "gud_dims:item/dimension_attribute/biome/water",
+    "layer3": "gud_dims:item/dimension_attribute/biome/sky",
+    "layer4": "gud_dims:item/dimension_attribute/biome/base"
   }
 }

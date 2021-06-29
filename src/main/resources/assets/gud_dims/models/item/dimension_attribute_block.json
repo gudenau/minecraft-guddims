@@ -1,9 +1,9 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "gud_dims:item/attribute/block/top",
-    "layer1": "gud_dims:item/attribute/block/left",
-    "layer2": "gud_dims:item/attribute/block/right",
-    "layer3": "gud_dims:item/attribute/block/base"
+    "layer0": "gud_dims:item/dimension_attribute/block/top",
+    "layer1": "gud_dims:item/dimension_attribute/block/left",
+    "layer2": "gud_dims:item/dimension_attribute/block/right",
+    "layer3": "gud_dims:item/dimension_attribute/block/base"
   }
 }

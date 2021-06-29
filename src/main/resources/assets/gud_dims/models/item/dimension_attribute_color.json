@@ -1,6 +1,7 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "gud_dims:item/attribute/color"
+    "layer0": "gud_dims:item/dimension_attribute/color/background",
+    "layer1": "gud_dims:item/dimension_attribute/color/core"
   }
 }

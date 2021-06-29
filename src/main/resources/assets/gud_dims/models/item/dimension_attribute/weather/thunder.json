@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "gud_dims:item/dimension_attribute/weather/thunder"
+  }
+}

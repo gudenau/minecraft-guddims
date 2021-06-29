@@ -10,9 +10,7 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.client.rendereregistry.v1.BlockEntityRendererRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.ColorProviderRegistry;
-import net.gudenau.minecraft.dims.api.v0.attribute.BiomeDimAttribute;
-import net.gudenau.minecraft.dims.api.v0.attribute.BlockDimAttribute;
-import net.gudenau.minecraft.dims.api.v0.attribute.FluidDimAttribute;
+import net.gudenau.minecraft.dims.api.v0.attribute.*;
 import net.gudenau.minecraft.dims.client.BlockColorCache;
 import net.gudenau.minecraft.dims.client.model.AttributeModelProvider;
 import net.gudenau.minecraft.dims.client.renderer.blockentity.PortalBlockEntityRenderer;
@@ -69,6 +67,7 @@ public final class DimsClient implements ClientModInitializer{
             var attribute = DimensionAttributeItem.getAttribute(stack);
             return attribute.map((value)->
                 switch(value.getType()){
+                    case COLOR -> tintIndex == 1 ? ((ColorDimAttribute)value).getColorValue() : -1;
                     case BIOME -> {
                         var biome = ((BiomeDimAttribute)value).getBiome();
                         yield switch(tintIndex){

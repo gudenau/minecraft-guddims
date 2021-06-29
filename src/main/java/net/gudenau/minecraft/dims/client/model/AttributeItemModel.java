@@ -1,6 +1,7 @@
 package net.gudenau.minecraft.dims.client.model;
 
 import com.mojang.datafixers.util.Pair;
+import java.io.IOException;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -9,6 +10,7 @@ import java.util.stream.Collectors;
 import net.fabricmc.fabric.api.client.model.ModelProviderContext;
 import net.fabricmc.fabric.api.renderer.v1.model.FabricBakedModel;
 import net.fabricmc.fabric.api.renderer.v1.render.RenderContext;
+import net.gudenau.minecraft.dims.api.v0.DimRegistry;
 import net.gudenau.minecraft.dims.api.v0.attribute.DimAttribute;
 import net.gudenau.minecraft.dims.api.v0.attribute.DimAttributeType;
 import net.gudenau.minecraft.dims.impl.DimRegistryImpl;
@@ -28,16 +30,19 @@ import org.jetbrains.annotations.Nullable;
 
 import static net.gudenau.minecraft.dims.Dims.MOD_ID;
 
-public class AttributeItemModel implements UnbakedModel, BakedModel, FabricBakedModel{
+public final class AttributeItemModel implements UnbakedModel, BakedModel, FabricBakedModel{
     private final Map<DimAttribute, BakedModel> modelMap = new HashMap<>();
     private Map<Identifier, UnbakedModel> unbakedModelMap;
     private Map<Identifier, BakedModel> minecraftModelMap;
     private ModelTransformation transformation;
     
+    private static String fixNamespace(String namespace){
+        return  namespace.equals("minecraft") ? MOD_ID : namespace;
+    }
+    
     public AttributeItemModel(ModelProviderContext context){
         try{
             var attributes = DimRegistryImpl.INSTANCE.getAttributes(
-                DimAttributeType.COLOR,
                 DimAttributeType.BIOME_CONTROLLER,
                 DimAttributeType.DIGIT,
                 DimAttributeType.BOOLEAN,
@@ -50,18 +55,29 @@ public class AttributeItemModel implements UnbakedModel, BakedModel, FabricBaked
                 .map((attribute)->{
                     var id = attribute.getId();
                     try{
-                        return Map.entry(id, context.loadModel(new Identifier(id.getNamespace(), "item/dimension_attribute_" + id.getPath())));
+                        var newId = new Identifier(
+                            fixNamespace(id.getNamespace()),
+                            "item/dimension_attribute/" + attribute.getType().name().toLowerCase(Locale.ROOT) + "/" + id.getPath()
+                        );
+                        
+                        return Map.entry(newId, context.loadModel(newId));
                     }catch(Throwable e){
                         return null;
                     }
                 })
                 .filter(Objects::nonNull)
                 .collect(HashMap::new, (map, entry)->map.put(entry.getKey(), entry.getValue()), HashMap::putAll);
-            Consumer<Identifier> modelAdder = (id)->
-                unbakedModelMap.put(id, context.loadModel(new Identifier(id.getNamespace(), "item/dimension_attribute_" + id.getPath())));
-            modelAdder.accept(new Identifier(MOD_ID, "block"));
-            modelAdder.accept(new Identifier(MOD_ID, "biome"));
-            modelAdder.accept(new Identifier(MOD_ID, "fluid"));
+            Consumer<Identifier> modelAdder = (id)->{
+                try{
+                    unbakedModelMap.put(id, context.loadModel(id));
+                }catch(Throwable e){
+                    throw new RuntimeException("Failed to preload model: " + id, e);
+                }
+            };
+            modelAdder.accept(new Identifier(MOD_ID, "item/dimension_attribute_block"));
+            modelAdder.accept(new Identifier(MOD_ID, "item/dimension_attribute_biome"));
+            modelAdder.accept(new Identifier(MOD_ID, "item/dimension_attribute_fluid"));
+            modelAdder.accept(new Identifier(MOD_ID, "item/dimension_attribute_color"));
         }catch(Throwable t){
             t.printStackTrace();
             System.exit(1);
@@ -75,48 +91,51 @@ public class AttributeItemModel implements UnbakedModel, BakedModel, FabricBaked
         var set = unbakedModelMap.values().stream()
             .flatMap((model)->model.getModelDependencies().stream())
             .collect(Collectors.toSet());
-        unbakedModelMap.keySet().stream()
-            .map((id)->new Identifier(id.getNamespace(), "item/dimension_attribute_" + id.getPath()))
-            .forEach(set::add);
+        set.addAll(unbakedModelMap.keySet());
         return set;
     }
     
     @Override
     public Collection<SpriteIdentifier> getTextureDependencies(Function<Identifier, UnbakedModel> unbakedModelGetter, Set<Pair<String, String>> unresolvedTextureReferences){
-        var deps = unbakedModelMap.values().stream()
+        return unbakedModelMap.values().stream()
             .flatMap((model)->model.getTextureDependencies(unbakedModelGetter, unresolvedTextureReferences).stream())
             .collect(Collectors.toUnmodifiableSet());
-        
-        return deps;
     }
     
-    @Nullable
     @Override
     public BakedModel bake(ModelLoader loader, Function<SpriteIdentifier, Sprite> textureGetter, ModelBakeSettings rotationContainer, Identifier modelId){
         minecraftModelMap = loader.getBakedModelMap();
     
         Function<Identifier, BakedModel> modelLoader = (id)->
-            loader.bake(new Identifier(id.getNamespace(), "item/dimension_attribute_" + id.getPath()), ModelRotation.X0_Y0);
+            loader.bake(new Identifier(fixNamespace(id.getNamespace()), "item/dimension_attribute_" + id.getPath()), ModelRotation.X0_Y0);
     
-        var blockModel = modelLoader.apply(new Identifier(MOD_ID, "block"));
-        var fluidModel = modelLoader.apply(new Identifier(MOD_ID, "fluid"));
-        var biomeModel = modelLoader.apply(new Identifier(MOD_ID, "biome"));
+        var colorModel = loader.bake(new Identifier(MOD_ID, "item/dimension_attribute_color"), ModelRotation.X0_Y0);
+        var blockModel = loader.bake(new Identifier(MOD_ID, "item/dimension_attribute_block"), ModelRotation.X0_Y0);
+        var fluidModel = loader.bake(new Identifier(MOD_ID, "item/dimension_attribute_fluid"), ModelRotation.X0_Y0);
+        var biomeModel = loader.bake(new Identifier(MOD_ID, "item/dimension_attribute_biome"), ModelRotation.X0_Y0);
     
         transformation = blockModel.getTransformation();
         
         for(var attribute : DimRegistryImpl.INSTANCE.getAttributes(DimAttributeType.values())){
             var bakedModel = switch(attribute.getType()){
+                case COLOR -> colorModel;
                 case BLOCK -> blockModel;
                 case FLUID -> fluidModel;
                 case BIOME -> biomeModel;
                 default -> {
                     var id = attribute.getId();
-                    yield modelLoader.apply(id);
+                    var newId = new Identifier(
+                        fixNamespace(id.getNamespace()),
+                        "item/dimension_attribute/" + attribute.getType().name().toLowerCase(Locale.ROOT) + "/" + id.getPath()
+                    );
+                    yield loader.bake(newId, ModelRotation.X0_Y0);
                 }
             };
             modelMap.put(attribute, bakedModel);
         }
     
+        unbakedModelMap.clear();
+        
         return this;
     }
     

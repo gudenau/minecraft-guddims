@@ -1,7 +1,7 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "gud_dims:item/attribute/fluid/tint",
-    "layer1": "gud_dims:item/attribute/fluid/base"
+    "layer0": "gud_dims:item/dimension_attribute/fluid/tint",
+    "layer1": "gud_dims:item/dimension_attribute/fluid/base"
   }
 }
