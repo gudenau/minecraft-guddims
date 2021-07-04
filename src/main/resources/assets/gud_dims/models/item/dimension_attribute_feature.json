@@ -1,0 +1,10 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "gud_dims:item/dimension_attribute/feature/a",
+    "layer1": "gud_dims:item/dimension_attribute/feature/b",
+    "layer2": "gud_dims:item/dimension_attribute/feature/c",
+    "layer3": "gud_dims:item/dimension_attribute/feature/d",
+    "layer4": "gud_dims:item/dimension_attribute/feature/background"
+  }
+}

@@ -25,7 +25,10 @@ public enum DimAttributeType{
     WEATHER("weather"),
     SKYLIGHT("skylight"),
     CELESTIAL("celestial"),
-    CELESTIAL_PROPERTY("celestial_property");
+    CELESTIAL_PROPERTY("celestial_property"),
+    FEATURE("feature"),
+    FEATURE_CONTROLLER("feature_controller"),
+    ;
     
     private static final Map<Identifier, DimAttributeType> VALUE_MAP;
     

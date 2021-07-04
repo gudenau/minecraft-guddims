@@ -178,6 +178,10 @@ public final class Dims implements ModInitializer, DimsInitializer{
             new Identifier(MOD_ID, "blocks"), ()->
                 DimensionAttributeItem.getStack(DimRegistry.getInstance().getRandomAttribute(DimAttributeType.BLOCK))
         );
+        public static final ItemGroup FEATURE_GROUP = FabricItemGroupBuilder.build(
+            new Identifier(MOD_ID, "feature"), ()->
+                DimensionAttributeItem.getStack(DimRegistry.getInstance().getRandomAttribute(DimAttributeType.FEATURE_CONTROLLER))
+        );
         public static final ItemGroup FLUID_GROUP = FabricItemGroupBuilder.build(
             new Identifier(MOD_ID, "fluids"), ()->
                 DimensionAttributeItem.getStack(DimRegistry.getInstance().getRandomAttribute(DimAttributeType.FLUID))

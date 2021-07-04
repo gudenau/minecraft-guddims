@@ -31,6 +31,14 @@ import org.jetbrains.annotations.Nullable;
 import static net.gudenau.minecraft.dims.Dims.MOD_ID;
 
 public final class AttributeItemModel implements UnbakedModel, BakedModel, FabricBakedModel{
+    private static final Map<DimAttributeType, Identifier> SPECIAL_MODELS = Map.of(
+        DimAttributeType.BLOCK, new Identifier(MOD_ID, "item/dimension_attribute_block"),
+        DimAttributeType.BIOME, new Identifier(MOD_ID, "item/dimension_attribute_biome"),
+        DimAttributeType.FEATURE, new Identifier(MOD_ID, "item/dimension_attribute_feature"),
+        DimAttributeType.FLUID, new Identifier(MOD_ID, "item/dimension_attribute_fluid"),
+        DimAttributeType.COLOR, new Identifier(MOD_ID, "item/dimension_attribute_color")
+    );
+    
     private final Map<DimAttribute, BakedModel> modelMap = new HashMap<>();
     private Map<Identifier, UnbakedModel> unbakedModelMap;
     private Map<Identifier, BakedModel> minecraftModelMap;
@@ -44,12 +52,13 @@ public final class AttributeItemModel implements UnbakedModel, BakedModel, Fabri
         try{
             var attributes = DimRegistryImpl.INSTANCE.getAttributes(
                 DimAttributeType.BIOME_CONTROLLER,
-                DimAttributeType.DIGIT,
                 DimAttributeType.BOOLEAN,
-                DimAttributeType.WEATHER,
-                DimAttributeType.SKYLIGHT,
                 DimAttributeType.CELESTIAL,
-                DimAttributeType.CELESTIAL_PROPERTY
+                DimAttributeType.CELESTIAL_PROPERTY,
+                DimAttributeType.DIGIT,
+                DimAttributeType.FEATURE_CONTROLLER,
+                DimAttributeType.SKYLIGHT,
+                DimAttributeType.WEATHER
             );
             unbakedModelMap = attributes.stream()
                 .map((attribute)->{
@@ -67,17 +76,13 @@ public final class AttributeItemModel implements UnbakedModel, BakedModel, Fabri
                 })
                 .filter(Objects::nonNull)
                 .collect(HashMap::new, (map, entry)->map.put(entry.getKey(), entry.getValue()), HashMap::putAll);
-            Consumer<Identifier> modelAdder = (id)->{
+            SPECIAL_MODELS.values().forEach((id)->{
                 try{
                     unbakedModelMap.put(id, context.loadModel(id));
                 }catch(Throwable e){
                     throw new RuntimeException("Failed to preload model: " + id, e);
                 }
-            };
-            modelAdder.accept(new Identifier(MOD_ID, "item/dimension_attribute_block"));
-            modelAdder.accept(new Identifier(MOD_ID, "item/dimension_attribute_biome"));
-            modelAdder.accept(new Identifier(MOD_ID, "item/dimension_attribute_fluid"));
-            modelAdder.accept(new Identifier(MOD_ID, "item/dimension_attribute_color"));
+            });
         }catch(Throwable t){
             t.printStackTrace();
             System.exit(1);
@@ -102,35 +107,26 @@ public final class AttributeItemModel implements UnbakedModel, BakedModel, Fabri
             .collect(Collectors.toUnmodifiableSet());
     }
     
+    private final Map<DimAttributeType, BakedModel> specialModels = new HashMap<>();
+    
     @Override
     public BakedModel bake(ModelLoader loader, Function<SpriteIdentifier, Sprite> textureGetter, ModelBakeSettings rotationContainer, Identifier modelId){
         minecraftModelMap = loader.getBakedModelMap();
-    
-        Function<Identifier, BakedModel> modelLoader = (id)->
-            loader.bake(new Identifier(fixNamespace(id.getNamespace()), "item/dimension_attribute_" + id.getPath()), ModelRotation.X0_Y0);
-    
-        var colorModel = loader.bake(new Identifier(MOD_ID, "item/dimension_attribute_color"), ModelRotation.X0_Y0);
-        var blockModel = loader.bake(new Identifier(MOD_ID, "item/dimension_attribute_block"), ModelRotation.X0_Y0);
-        var fluidModel = loader.bake(new Identifier(MOD_ID, "item/dimension_attribute_fluid"), ModelRotation.X0_Y0);
-        var biomeModel = loader.bake(new Identifier(MOD_ID, "item/dimension_attribute_biome"), ModelRotation.X0_Y0);
-    
-        transformation = blockModel.getTransformation();
+        
+        specialModels.clear();
+        SPECIAL_MODELS.forEach((type, id)->specialModels.put(type, loader.bake(id, ModelRotation.X0_Y0)));
+        transformation = specialModels.values().stream().findAny().get().getTransformation();
         
         for(var attribute : DimRegistryImpl.INSTANCE.getAttributes(DimAttributeType.values())){
-            var bakedModel = switch(attribute.getType()){
-                case COLOR -> colorModel;
-                case BLOCK -> blockModel;
-                case FLUID -> fluidModel;
-                case BIOME -> biomeModel;
-                default -> {
-                    var id = attribute.getId();
-                    var newId = new Identifier(
-                        fixNamespace(id.getNamespace()),
-                        "item/dimension_attribute/" + attribute.getType().name().toLowerCase(Locale.ROOT) + "/" + id.getPath()
-                    );
-                    yield loader.bake(newId, ModelRotation.X0_Y0);
-                }
-            };
+            var bakedModel = specialModels.get(attribute.getType());
+            if(bakedModel == null){
+                var id = attribute.getId();
+                var newId = new Identifier(
+                    fixNamespace(id.getNamespace()),
+                    "item/dimension_attribute/" + attribute.getType().name().toLowerCase(Locale.ROOT) + "/" + id.getPath()
+                );
+                bakedModel = loader.bake(newId, ModelRotation.X0_Y0);
+            }
             modelMap.put(attribute, bakedModel);
         }
     
@@ -193,8 +189,12 @@ public final class AttributeItemModel implements UnbakedModel, BakedModel, Fabri
     
     @Override
     public void emitItemQuads(ItemStack stack, Supplier<Random> randomSupplier, RenderContext context){
-        context.fallbackConsumer().accept(DimensionAttributeItem.getAttribute(stack)
-            .map(modelMap::get)
+        var attribute = DimensionAttributeItem.getAttribute(stack);
+        context.fallbackConsumer().accept(attribute
+            .map((key)->modelMap.computeIfAbsent(key, (key2)->{
+                var model = specialModels.get(DimAttributeType.BIOME);
+                return model == null ? minecraftModelMap.get(ModelLoader.MISSING_ID) : model;
+            }))
             .orElseGet(()->minecraftModelMap.get(ModelLoader.MISSING_ID))
         );
     }

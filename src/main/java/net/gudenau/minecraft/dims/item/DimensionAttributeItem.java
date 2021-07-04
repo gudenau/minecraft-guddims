@@ -46,7 +46,8 @@ public final class DimensionAttributeItem extends Item{
             DimRegistry.getInstance().getAttributes(
                 DimAttributeType.BIOME_CONTROLLER,
                 DimAttributeType.SKYLIGHT,
-                DimAttributeType.WEATHER
+                DimAttributeType.WEATHER,
+                DimAttributeType.FEATURE_CONTROLLER
             ).stream()
                 .map(DimensionAttributeItem::getStack)
                 .forEach(stacks::add);
@@ -71,6 +72,10 @@ public final class DimensionAttributeItem extends Item{
                 .forEach(stacks::add);
         }else if(group == Dims.Items.FLUID_GROUP){
             DimRegistry.getInstance().getAttributes(DimAttributeType.FLUID).stream()
+                .map(DimensionAttributeItem::getStack)
+                .forEach(stacks::add);
+        }else if(group == Dims.Items.FEATURE_GROUP){
+            DimRegistry.getInstance().getAttributes(DimAttributeType.FEATURE).stream()
                 .map(DimensionAttributeItem::getStack)
                 .forEach(stacks::add);
         }

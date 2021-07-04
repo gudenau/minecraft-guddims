@@ -21,6 +21,7 @@ import net.gudenau.minecraft.dims.api.v0.attribute.*;
 import net.gudenau.minecraft.dims.api.v0.controller.*;
 import net.gudenau.minecraft.dims.impl.attribute.*;
 import net.gudenau.minecraft.dims.impl.client.SkyRegistry;
+import net.gudenau.minecraft.dims.impl.controller.feature.FeatureController;
 import net.minecraft.block.Blocks;
 import net.minecraft.item.AirBlockItem;
 import net.minecraft.item.BlockItem;
@@ -63,23 +64,29 @@ public final class DimRegistryImpl implements DimRegistry{
     private final List<BiomeControllerDimAttribute> biomeControllerAttributeList = new ArrayList<>();
     private final Map<Identifier, BiomeControllerDimAttribute> biomeControllerAttributeMap = new HashMap<>();
     
-    private List<DigitDimAttribute> digitDimAttributeList;
-    private Map<Identifier, DigitDimAttribute> digitDimAttributeMap;
+    private List<DigitDimAttribute> digitAttributeList;
+    private Map<Identifier, DigitDimAttribute> digitAttributeMap;
     
-    private List<BooleanDimAttribute> booleanDimAttributeList;
-    private Map<Identifier, BooleanDimAttribute> booleanDimAttributeMap;
+    private List<BooleanDimAttribute> booleanAttributeList;
+    private Map<Identifier, BooleanDimAttribute> booleanAttributeMap;
     
-    private final List<WeatherDimAttribute> weatherDimAttributeList = new ArrayList<>();
-    private final Map<Identifier, WeatherDimAttribute> weatherDimAttributeMap = new HashMap<>();
+    private final List<WeatherDimAttribute> weatherAttributeList = new ArrayList<>();
+    private final Map<Identifier, WeatherDimAttribute> weatherAttributeMap = new HashMap<>();
     
-    private final List<SkylightDimAttribute> skylightDimAttributeList = new ArrayList<>();
-    private final Map<Identifier, SkylightDimAttribute> skylightDimAttributeMap = new HashMap<>();
+    private final List<SkylightDimAttribute> skylightAttributeList = new ArrayList<>();
+    private final Map<Identifier, SkylightDimAttribute> skylightAttributeMap = new HashMap<>();
     
-    private final List<CelestialDimAttribute> celestialDimAttributeList = new ArrayList<>();
-    private final Map<Identifier, CelestialDimAttribute> celestialDimAttributeMap = new HashMap<>();
+    private final List<CelestialDimAttribute> celestialAttributeList = new ArrayList<>();
+    private final Map<Identifier, CelestialDimAttribute> celestialAttributeMap = new HashMap<>();
     
-    private List<CelestialPropertyDimAttribute> celestialPropertyDimAttributeList;
-    private Map<Identifier, CelestialPropertyDimAttribute> celestialPropertyDimAttributeMap;
+    private List<CelestialPropertyDimAttribute> celestialPropertyAttributeList;
+    private Map<Identifier, CelestialPropertyDimAttribute> celestialPropertyAttributeMap;
+    
+    private List<FeatureDimAttribute> featureAttributeList;
+    private Map<Identifier, FeatureDimAttribute> featureAttributeMap;
+    
+    private final List<FeatureControllerDimAttribute> featureControllerAttributeList = new ArrayList<>();
+    private final Map<Identifier, FeatureControllerDimAttribute> featureControllerAttributeMap = new HashMap<>();
     
     private final Set<DimInfo> pendingDims = new HashSet<>();
     
@@ -93,12 +100,14 @@ public final class DimRegistryImpl implements DimRegistry{
             case COLOR -> colorAttributeList;
             case BIOME -> biomeAttributeList;
             case BIOME_CONTROLLER -> Collections.unmodifiableList(biomeControllerAttributeList);
-            case DIGIT -> digitDimAttributeList;
-            case BOOLEAN -> booleanDimAttributeList;
-            case WEATHER -> Collections.unmodifiableList(weatherDimAttributeList);
-            case SKYLIGHT -> Collections.unmodifiableList(skylightDimAttributeList);
-            case CELESTIAL -> Collections.unmodifiableList(celestialDimAttributeList);
-            case CELESTIAL_PROPERTY -> celestialPropertyDimAttributeList;
+            case DIGIT -> digitAttributeList;
+            case BOOLEAN -> booleanAttributeList;
+            case WEATHER -> Collections.unmodifiableList(weatherAttributeList);
+            case SKYLIGHT -> Collections.unmodifiableList(skylightAttributeList);
+            case CELESTIAL -> Collections.unmodifiableList(celestialAttributeList);
+            case CELESTIAL_PROPERTY -> celestialPropertyAttributeList;
+            case FEATURE -> Collections.unmodifiableList(featureAttributeList);
+            case FEATURE_CONTROLLER -> featureControllerAttributeList;
         };
         return result == null ? List.of() : result;
     }
@@ -123,12 +132,14 @@ public final class DimRegistryImpl implements DimRegistry{
             case COLOR -> colorAttributeMap;
             case BIOME -> biomeAttributeMap;
             case BIOME_CONTROLLER -> Collections.unmodifiableMap(biomeControllerAttributeMap);
-            case DIGIT -> digitDimAttributeMap;
-            case BOOLEAN -> booleanDimAttributeMap;
-            case WEATHER -> Collections.unmodifiableMap(weatherDimAttributeMap);
-            case SKYLIGHT -> Collections.unmodifiableMap(skylightDimAttributeMap);
-            case CELESTIAL -> Collections.unmodifiableMap(celestialDimAttributeMap);
-            case CELESTIAL_PROPERTY -> celestialPropertyDimAttributeMap;
+            case DIGIT -> digitAttributeMap;
+            case BOOLEAN -> booleanAttributeMap;
+            case WEATHER -> Collections.unmodifiableMap(weatherAttributeMap);
+            case SKYLIGHT -> Collections.unmodifiableMap(skylightAttributeMap);
+            case CELESTIAL -> Collections.unmodifiableMap(celestialAttributeMap);
+            case CELESTIAL_PROPERTY -> celestialPropertyAttributeMap;
+            case FEATURE -> Collections.unmodifiableMap(featureAttributeMap);
+            case FEATURE_CONTROLLER -> featureControllerAttributeMap;
         }).get(attribute));
     }
     
@@ -222,25 +233,33 @@ public final class DimRegistryImpl implements DimRegistry{
             }
             case WEATHER -> {
                 var attribute = new WeatherDimAttributeImpl((WeatherDimController)controller);
-                if(weatherDimAttributeMap.putIfAbsent(attribute.getId(), attribute) != null){
+                if(weatherAttributeMap.putIfAbsent(attribute.getId(), attribute) != null){
                     throw new IllegalStateException("Weather controller " + attribute.getId() + " was already registered");
                 }
-                weatherDimAttributeList.add(attribute);
+                weatherAttributeList.add(attribute);
             }
             case SKYLIGHT -> {
                 var attribute = new SkylightDimAttributeImpl((SkylightDimController)controller);
-                if(skylightDimAttributeMap.putIfAbsent(attribute.getId(), attribute) != null){
+                if(skylightAttributeMap.putIfAbsent(attribute.getId(), attribute) != null){
                     throw new IllegalStateException("Skylight controller " + attribute.getId() + " was already registered");
                 }
-                skylightDimAttributeList.add(attribute);
+                skylightAttributeList.add(attribute);
             }
             case CELESTIAL -> {
                 var attribute = new CelestialDimAttributeImpl((CelestialDimController)controller);
-                if(celestialDimAttributeMap.put(attribute.getId(), attribute) != null){
+                if(celestialAttributeMap.put(attribute.getId(), attribute) != null){
                     throw new IllegalStateException("Celestial controller " + attribute.getId() + " was already registered");
                 }
-                celestialDimAttributeList.add(attribute);
+                celestialAttributeList.add(attribute);
             }
+            case FEATURE -> {
+                var attribute = new FeatureControllerDimAttributeImpl((FeatureController)controller);
+                if(featureControllerAttributeMap.put(attribute.getId(), attribute) != null){
+                    throw new IllegalStateException("Feature controller " + attribute.getId() + " was already registered");
+                }
+                featureControllerAttributeList.add(attribute);
+            }
+            default -> throw new RuntimeException("Unimplemented controller type: " + controller.getType().name());
         }
     }
     
@@ -250,9 +269,10 @@ public final class DimRegistryImpl implements DimRegistry{
     public <T> Optional<T> getController(ControllerType type, Identifier id){
         return Optional.ofNullable((T)(Object)switch(type){
             case BIOME -> biomeControllerAttributeMap.get(id);
-            case WEATHER -> weatherDimAttributeMap.get(id);
-            case SKYLIGHT -> skylightDimAttributeMap.get(id);
-            case CELESTIAL -> celestialDimAttributeMap.get(id);
+            case WEATHER -> weatherAttributeMap.get(id);
+            case SKYLIGHT -> skylightAttributeMap.get(id);
+            case CELESTIAL -> celestialAttributeMap.get(id);
+            case FEATURE -> featureAttributeMap.get(id);
         });
     }
     
@@ -379,7 +399,7 @@ public final class DimRegistryImpl implements DimRegistry{
             .toList();
         colorAttributeMap = toMap(colorAttributeList);
     
-        digitDimAttributeList = Stream.of(
+        digitAttributeList = Stream.of(
                 IntStream.range(0, 10).mapToObj(DigitDimAttributeImpl::new),
                 Stream.of(new DigitDimAttributeImpl(DigitDimAttribute.DigitType.DECIMAL))
             )
@@ -387,20 +407,25 @@ public final class DimRegistryImpl implements DimRegistry{
             .sorted(Comparator.comparing(DimAttribute::getId))
             .map((attribute)->(DigitDimAttribute)attribute)
             .toList();
-        digitDimAttributeMap = toMap(digitDimAttributeList);
+        digitAttributeMap = toMap(digitAttributeList);
         
-        booleanDimAttributeList = List.of(
+        booleanAttributeList = List.of(
             new BooleanDimAttributeImpl(false),
             new BooleanDimAttributeImpl(true)
         );
-        booleanDimAttributeMap = toMap(booleanDimAttributeList);
+        booleanAttributeMap = toMap(booleanAttributeList);
         
-        celestialPropertyDimAttributeList = Stream.of(CelestialPropertyDimAttribute.Property.values())
+        celestialPropertyAttributeList = Stream.of(CelestialPropertyDimAttribute.Property.values())
             .map(CelestialPropertyDimAttributeImpl::new)
             .sorted(Comparator.comparing(DimAttribute::getId))
             .map((attribute)->(CelestialPropertyDimAttribute)attribute)
             .toList();
-        celestialPropertyDimAttributeMap = toMap(celestialPropertyDimAttributeList);
+        celestialPropertyAttributeMap = toMap(celestialPropertyAttributeList);
+        
+        featureAttributeList = Registry.FEATURE.stream()
+            .map((feature)->(FeatureDimAttribute)new FeatureDimAttributeImpl(feature, Registry.FEATURE.getId(feature)))
+            .toList();
+        featureAttributeMap = toMap(featureAttributeList);
     }
     
     private static <T extends DimAttribute> Map<Identifier, T> toMap(List<T> attributes){

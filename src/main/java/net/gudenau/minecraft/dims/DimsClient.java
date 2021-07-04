@@ -17,6 +17,7 @@ import net.gudenau.minecraft.dims.client.renderer.blockentity.PortalBlockEntityR
 import net.gudenau.minecraft.dims.impl.client.SkyRegistry;
 import net.gudenau.minecraft.dims.item.DimensionAttributeItem;
 import net.minecraft.client.color.world.BiomeColors;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.util.registry.RegistryKey;
 
@@ -67,7 +68,6 @@ public final class DimsClient implements ClientModInitializer{
             var attribute = DimensionAttributeItem.getAttribute(stack);
             return attribute.map((value)->
                 switch(value.getType()){
-                    case COLOR -> tintIndex == 1 ? ((ColorDimAttribute)value).getColorValue() : -1;
                     case BIOME -> {
                         var biome = ((BiomeDimAttribute)value).getBiome();
                         yield switch(tintIndex){
@@ -86,6 +86,18 @@ public final class DimsClient implements ClientModInitializer{
                             case 1 -> colors.b();
                             case 2 -> colors.c();
                             default -> 0xFFFFFFF;
+                        };
+                    }
+                    case COLOR -> tintIndex == 1 ? ((ColorDimAttribute)value).getColorValue() : -1;
+                    case FEATURE ->{
+                        var id = value.getId();
+                        var hash = id.toString().hashCode();
+                        yield switch(tintIndex){
+                            case 0 -> MathHelper.hsvToRgb((hash & 0xFF) / 255F, 1, 1);
+                            case 1 -> MathHelper.hsvToRgb(((hash >>> 8) & 0xFF) / 255F, 1, 1);
+                            case 2 -> MathHelper.hsvToRgb(((hash >>> 16) & 0xFF) / 255F, 1, 1);
+                            case 3 -> MathHelper.hsvToRgb((hash >>> 24) / 255F, 1, 1);
+                            default -> 0xFFFFFFFF;
                         };
                     }
                     case FLUID ->{

@@ -8,6 +8,7 @@ import net.gudenau.minecraft.dims.api.v0.controller.*;
 import net.gudenau.minecraft.dims.impl.controller.biome.CheckerboardBiomeDimControllerImpl;
 import net.gudenau.minecraft.dims.impl.controller.biome.SingleBiomeDimControllerImpl;
 import net.gudenau.minecraft.dims.impl.controller.celestial.controller.*;
+import net.gudenau.minecraft.dims.impl.controller.feature.FeatureController;
 import net.gudenau.minecraft.dims.impl.controller.weather.BasicWeatherController;
 import net.gudenau.minecraft.dims.impl.controller.weather.VanillaWeatherController;
 import net.gudenau.minecraft.dims.impl.weather.ClearWeather;
@@ -31,8 +32,22 @@ public final class DefaultControllers{
         return Stream.of(
             createBiomeControllers(),
             createWeatherControllers(),
-            createCelestialControllers()
+            createCelestialControllers(),
+            createFeatureControllers()
         ).flatMap(Collection::stream).collect(Collectors.toUnmodifiableSet());
+    }
+    
+    /**
+     * Creates a set of all feature controllers.
+     *
+     * @return A set of all feature controllers
+     *
+     * @since 0.0.6
+     * */
+    private static Set<FeatureDimController> createFeatureControllers(){
+        return Set.of(
+            new FeatureController()
+        );
     }
     
     /**
