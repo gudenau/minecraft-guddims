@@ -1,6 +1,7 @@
 {
-  "parent": "minecraft:block/cube_all",
+  "parent": "minecraft:block/cube_column",
   "textures": {
-    "all": "gud_dims:block/priscillite"
+    "side": "gud_dims:block/priscillite",
+    "end": "gud_dims:block/priscillite_top"
   }
 }

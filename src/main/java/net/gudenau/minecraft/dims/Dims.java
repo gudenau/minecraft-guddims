@@ -27,6 +27,7 @@ import net.gudenau.minecraft.dims.item.DimensionTokenItem;
 import net.minecraft.block.Block;
 import net.minecraft.block.MapColor;
 import net.minecraft.block.Material;
+import net.minecraft.block.PillarBlock;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.item.*;
@@ -100,19 +101,25 @@ public final class Dims implements ModInitializer, DimsInitializer{
     
     public static final class Blocks{
         public static final Block ANCHOR_MINTER = new AnchorMinterBlock(
-            FabricBlockSettings.of(Material.GLASS, MapColor.LIGHT_BLUE).strength(3).sounds(BlockSoundGroup.GLASS).luminance((state)->15)
+            FabricBlockSettings.of(Material.GLASS, MapColor.LIGHT_BLUE).strength(3).sounds(BlockSoundGroup.GLASS).luminance((state)->13)
         );
         public static final Block DIMENSION_BUILDER = new DimensionBuilderBlock(
-            FabricBlockSettings.of(Material.GLASS, MapColor.LIGHT_BLUE).strength(3).sounds(BlockSoundGroup.GLASS).luminance((state)->15)
+            FabricBlockSettings.of(Material.GLASS, MapColor.LIGHT_BLUE).strength(3).sounds(BlockSoundGroup.GLASS).luminance((state)->13)
         );
-        public static final Block PRISCILLITE = new Block(
-            FabricBlockSettings.of(Material.GLASS, DyeColor.LIGHT_BLUE).strength(0.3F).sounds(BlockSoundGroup.GLASS).luminance((state)->15)
+        public static final Block PRISCILLITE = new PillarBlock(
+            FabricBlockSettings.of(Material.GLASS, DyeColor.LIGHT_BLUE).strength(0.3F).sounds(BlockSoundGroup.GLASS).luminance((state)->12)
+        );
+        public static final Block PRISCILLITE_POLISHED = new Block(
+                FabricBlockSettings.of(Material.GLASS, DyeColor.LIGHT_BLUE).strength(0.3F).sounds(BlockSoundGroup.GLASS).luminance((state)->13)
+        );
+        public static final Block PRISCILLITE_EMBOSSED = new Block(
+                FabricBlockSettings.of(Material.GLASS, DyeColor.LIGHT_BLUE).strength(0.3F).sounds(BlockSoundGroup.GLASS).luminance((state)->13)
         );
         public static final Block PORTAL = new PortalBlock(
             FabricBlockSettings.of(Material.PORTAL).noCollision().strength(-1).sounds(BlockSoundGroup.GLASS).luminance((state)->16)
         );
         public static final Block PORTAL_RECEPTACLE = new PortalReceptacleBlock(
-            FabricBlockSettings.of(Material.GLASS, MapColor.LIGHT_BLUE).strength(3).sounds(BlockSoundGroup.GLASS).luminance((state)->15)
+            FabricBlockSettings.of(Material.GLASS, MapColor.LIGHT_BLUE).strength(3).sounds(BlockSoundGroup.GLASS).luminance((state)->13)
         );
         
         private static void register(String name, Block block){
@@ -125,6 +132,8 @@ public final class Dims implements ModInitializer, DimsInitializer{
             register("priscillite", PRISCILLITE);
             register("portal", PORTAL);
             register("portal_receptacle", PORTAL_RECEPTACLE);
+            register("priscillite_polished", PRISCILLITE_POLISHED);
+            register("priscillite_embossed", PRISCILLITE_EMBOSSED);
             
             Entities.init();
         }
@@ -201,6 +210,8 @@ public final class Dims implements ModInitializer, DimsInitializer{
         public static final BlockItem ANCHOR_MINTER = new BlockItem(Blocks.ANCHOR_MINTER, new FabricItemSettings().group(GROUP));
         public static final BlockItem DIMENSION_BUILDER = new BlockItem(Blocks.DIMENSION_BUILDER, new FabricItemSettings().group(GROUP));
         public static final BlockItem PRISCILLITE = new BlockItem(Blocks.PRISCILLITE, new FabricItemSettings().group(GROUP));
+        public static final BlockItem PRISCILLITE_POLISHED = new BlockItem(Blocks.PRISCILLITE_POLISHED, new FabricItemSettings().group(GROUP));
+        public static final BlockItem PRISCILLITE_EMBOSSED = new BlockItem(Blocks.PRISCILLITE_EMBOSSED, new FabricItemSettings().group(GROUP));
         public static final BlockItem PORTAL_RECEPTACLE = new BlockItem(Blocks.PORTAL_RECEPTACLE, new FabricItemSettings().group(GROUP));
     
         private static void register(String name, Item item){
@@ -221,6 +232,8 @@ public final class Dims implements ModInitializer, DimsInitializer{
             register(ANCHOR_MINTER);
             register(PRISCILLITE);
             register(PORTAL_RECEPTACLE);
+            register(PRISCILLITE_POLISHED);
+            register(PRISCILLITE_EMBOSSED);
         }
     }
     
