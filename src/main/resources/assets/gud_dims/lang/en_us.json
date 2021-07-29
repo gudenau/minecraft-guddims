@@ -9,6 +9,8 @@
   "block.gud_dims.dimension_builder": "Dimension Builder",
   "block.gud_dims.portal_receptacle": "Portal Receptacle",
   "block.gud_dims.priscillite": "Priscillite",
+  "block.gud_dims.priscillite_polished": "Polished Priscillite",
+  "block.gud_dims.priscillite_embossed": "Embossed Priscillite",
 
   "celestial.gud_dims.end_sky": "End Sky",
   "celestial.gud_dims.moon": "Moon",

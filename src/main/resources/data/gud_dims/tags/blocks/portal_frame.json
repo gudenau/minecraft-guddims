@@ -2,6 +2,8 @@
   "replace": false,
   "values": [
     "gud_dims:priscillite",
+    "gud_dims:priscillite_polished",
+    "gud_dims:priscillite_embossed",
     "gud_dims:portal",
     "gud_dims:portal_receptacle"
   ]

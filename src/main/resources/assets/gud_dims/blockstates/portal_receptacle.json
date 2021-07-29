@@ -1,7 +1,19 @@
 {
   "variants": {
-    "": {
+    "facing=east": {
+      "model": "gud_dims:block/portal_receptacle",
+      "y": 90
+    },
+    "facing=north": {
       "model": "gud_dims:block/portal_receptacle"
+    },
+    "facing=south": {
+      "model": "gud_dims:block/portal_receptacle",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "gud_dims:block/portal_receptacle",
+      "y": 270
     }
   }
 }

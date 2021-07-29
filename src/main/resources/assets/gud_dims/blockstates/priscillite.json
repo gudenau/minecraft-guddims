@@ -1,7 +1,16 @@
 {
   "variants": {
-    "": {
+    "axis=x": {
+      "model": "gud_dims:block/priscillite",
+      "x": 90,
+      "y": 90
+    },
+    "axis=y": {
       "model": "gud_dims:block/priscillite"
+    },
+    "axis=z": {
+      "model": "gud_dims:block/priscillite",
+      "x": 90
     }
   }
 }
