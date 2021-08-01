@@ -1,11 +1,15 @@
 package net.gudenau.minecraft.dims.item;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import net.gudenau.minecraft.dims.Dims;
 import net.gudenau.minecraft.dims.api.v0.*;
 import net.gudenau.minecraft.dims.api.v0.attribute.*;
 import net.gudenau.minecraft.dims.item.tpdata.ItemStackTooltipData;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.item.TooltipContext;
 import net.minecraft.client.item.TooltipData;
 import net.minecraft.item.Item;
@@ -15,6 +19,7 @@ import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.collection.DefaultedList;
+import net.minecraft.util.registry.BuiltinRegistries;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
@@ -137,6 +142,30 @@ public final class DimensionAttributeItem extends Item{
                         new TranslatableText("tooltip.gud_dims.type.fluid")
                             .append(Text.of(": "))
                             .append(new TranslatableText("block." + blockId.getNamespace() + "." + blockId.getPath()))
+                    );
+                }
+                case FEATURE -> {
+                    var feature = ((FeatureDimAttribute)attribute).getFeature().get();
+                    var featureRegistry = MinecraftClient.getInstance().world.getRegistryManager().getMutable(Registry.CONFIGURED_FEATURE_KEY);
+                    var featureId = featureRegistry.getId(feature);
+                    var featurePath = featureId.getPath();
+                    if(featurePath.contains("/")){
+                        featurePath = featurePath.substring(featurePath.lastIndexOf('/') + 1);
+                    }
+                    var featureName = Stream.of(featurePath.split("_"))
+                        .map((segment)->{
+                            if(segment.length() > 1){
+                                return segment.substring(0, 1).toUpperCase(Locale.ROOT) + segment.substring(1);
+                            }else{
+                                return segment.toUpperCase(Locale.ROOT);
+                            }
+                        })
+                        .collect(Collectors.joining(" "));
+                    
+                    tooltip.add(
+                        new TranslatableText("tooltip.gud_dims.type.feature")
+                            .append(Text.of(": "))
+                            .append(Text.of(featureName))
                     );
                 }
                 default ->

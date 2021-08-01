@@ -15,4 +15,9 @@ public interface FeatureDimController extends DimController<FeatureControllerDim
     default ControllerType getType(){
         return ControllerType.FEATURE;
     }
+    
+    @Override
+    default boolean areDuplicatesAllowed(){
+        return true;
+    }
 }

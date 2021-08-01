@@ -111,26 +111,31 @@ public final class AttributeItemModel implements UnbakedModel, BakedModel, Fabri
     
     @Override
     public BakedModel bake(ModelLoader loader, Function<SpriteIdentifier, Sprite> textureGetter, ModelBakeSettings rotationContainer, Identifier modelId){
-        minecraftModelMap = loader.getBakedModelMap();
-        
-        specialModels.clear();
-        SPECIAL_MODELS.forEach((type, id)->specialModels.put(type, loader.bake(id, ModelRotation.X0_Y0)));
-        transformation = specialModels.values().stream().findAny().get().getTransformation();
-        
-        for(var attribute : DimRegistryImpl.INSTANCE.getAttributes(DimAttributeType.values())){
-            var bakedModel = specialModels.get(attribute.getType());
-            if(bakedModel == null){
-                var id = attribute.getId();
-                var newId = new Identifier(
-                    fixNamespace(id.getNamespace()),
-                    "item/dimension_attribute/" + attribute.getType().name().toLowerCase(Locale.ROOT) + "/" + id.getPath()
-                );
-                bakedModel = loader.bake(newId, ModelRotation.X0_Y0);
-            }
-            modelMap.put(attribute, bakedModel);
-        }
+        try{
+            minecraftModelMap = loader.getBakedModelMap();
     
-        unbakedModelMap.clear();
+            specialModels.clear();
+            SPECIAL_MODELS.forEach((type, id)->specialModels.put(type, loader.bake(id, ModelRotation.X0_Y0)));
+            transformation = specialModels.values().stream().findAny().get().getTransformation();
+    
+            for(var attribute : DimRegistryImpl.INSTANCE.getAttributes(DimAttributeType.values())){
+                var bakedModel = specialModels.get(attribute.getType());
+                if(bakedModel == null){
+                    var id = attribute.getId();
+                    var newId = new Identifier(
+                        fixNamespace(id.getNamespace()),
+                        "item/dimension_attribute/" + attribute.getType().name().toLowerCase(Locale.ROOT) + "/" + id.getPath()
+                    );
+                    bakedModel = loader.bake(newId, ModelRotation.X0_Y0);
+                }
+                modelMap.put(attribute, bakedModel);
+            }
+    
+            unbakedModelMap.clear();
+        }catch(Throwable t){
+            t.printStackTrace();
+            System.exit(1);
+        }
         
         return this;
     }

@@ -4,6 +4,7 @@ import com.mojang.serialization.Lifecycle;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import java.util.*;
 import java.util.function.BooleanSupplier;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import net.fabricmc.fabric.api.util.NbtType;
 import net.gudenau.minecraft.dims.accessor.MinecraftServerAccessor;
@@ -13,6 +14,7 @@ import net.gudenau.minecraft.dims.api.v0.attribute.*;
 import net.gudenau.minecraft.dims.api.v0.controller.CelestialDimController;
 import net.gudenau.minecraft.dims.api.v0.controller.WeatherDimController;
 import net.gudenau.minecraft.dims.api.v0.util.collection.ObjectIntPair;
+import net.gudenau.minecraft.dims.duck.BiomeDuck;
 import net.gudenau.minecraft.dims.impl.controller.celestial.object.*;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtList;
@@ -21,19 +23,26 @@ import net.minecraft.server.WorldGenerationProgressListener;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.tag.BlockTags;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.crash.CrashException;
+import net.minecraft.util.crash.CrashReport;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.util.registry.RegistryKey;
+import net.minecraft.world.ChunkRegion;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
+import net.minecraft.world.biome.source.BiomeAccess;
 import net.minecraft.world.biome.source.BiomeSource;
 import net.minecraft.world.biome.source.HorizontalVoronoiBiomeAccessType;
+import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.ChunkStatus;
 import net.minecraft.world.dimension.DimensionType;
-import net.minecraft.world.gen.Spawner;
+import net.minecraft.world.gen.*;
 import net.minecraft.world.gen.chunk.ChunkGenerator;
 import net.minecraft.world.gen.chunk.ChunkGeneratorSettings;
 import net.minecraft.world.gen.chunk.NoiseChunkGenerator;
+import net.minecraft.world.gen.feature.ConfiguredFeature;
 import net.minecraft.world.level.ServerWorldProperties;
 import org.jetbrains.annotations.Nullable;
 
@@ -59,6 +68,7 @@ public final class DimInfo{
     private DimensionWorldProperties worldProps;
     private DimensionType dimensionType;
     private List<CelestialDimController.CelestialObject> celestialObjects;
+    private Map<Biome, List<List<Supplier<ConfiguredFeature<?, ?>>>>> featureOverrides;
     
     DimInfo(MinecraftServer server, NbtCompound tag){
         uuid = tag.getUuid("uuid");
@@ -167,10 +177,61 @@ public final class DimInfo{
         biomeSource = biomeSourcePair.object();
         instability += biomeSourcePair.integer();
         worldProps = createWorldProperties(server, attributeMap);
+        featureOverrides = createFeatureOverrides(attributeMultiMap.get(DimAttributeType.FEATURE_CONTROLLER));
     
         dimensionType = createDimType(server, attributeMap);
     
         celestialObjects = createCelestialObjects(attributeMultiMap.get(DimAttributeType.CELESTIAL));
+    }
+    
+    private Map<Biome, List<List<Supplier<ConfiguredFeature<?, ?>>>>> createFeatureOverrides(List<List<DimAttribute>> featureLists){
+        if(featureLists == null){
+            return null;
+        }
+        Map<Biome, List<List<Supplier<ConfiguredFeature<?, ?>>>>> featureMap = new Object2ObjectOpenHashMap<>();
+        for(var featureList : featureLists){
+            if(featureList.isEmpty()){
+                continue;
+            }
+            var biomes = new HashSet<Biome>();
+            var features = new ArrayList<List<Supplier<ConfiguredFeature<?, ?>>>>();
+            for(int i = 1; i < featureList.size(); i++){
+                var attribute = featureList.get(i);
+                switch(attribute.getType()){
+                    case BIOME -> biomes.add(((BiomeDimAttribute)attribute).getBiome());
+                    case FEATURE -> {
+                        var featureAttribute = (FeatureDimAttribute)attribute;
+                        var featureStep = featureAttribute.getFeatureStep();
+                        while(features.size() <= featureStep){
+                            features.add(new ArrayList<>());
+                        }
+                        features.get(featureStep).add(featureAttribute.getFeature());
+                    }
+                    default -> throw new RuntimeException("Wrong attribute in feature overrides");
+                }
+            }
+            //FIXME Merge these lists correctly.
+            if(biomes.isEmpty()){
+                featureMap.computeIfAbsent(null, (key)->new ArrayList<>())
+                    .addAll(features);
+            }else{
+                biomes.forEach((biome)->
+                    featureMap.computeIfAbsent(biome, (key)->new ArrayList<>())
+                        .addAll(features)
+                );
+            }
+        }
+        if(featureMap.isEmpty()){
+            return null;
+        }
+        featureMap.replaceAll((biome, list)->{
+            var iterator = list.listIterator();
+            while(iterator.hasNext()){
+                iterator.set(Collections.unmodifiableList(iterator.next()));
+            }
+            return Collections.unmodifiableList(list);
+        });
+        return Collections.unmodifiableMap(featureMap);
     }
     
     /**
@@ -459,7 +520,66 @@ public final class DimInfo{
             biomeSource,
             seed,
             ()->registryManager.get(Registry.CHUNK_GENERATOR_SETTINGS_KEY).getOrThrow(ChunkGeneratorSettings.OVERWORLD)
-        );
+        ){
+            @Override
+            public void generateFeatures(ChunkRegion region, StructureAccessor accessor){
+                if(featureOverrides == null){
+                    super.generateFeatures(region, accessor);
+                    return;
+                }
+                
+                var chunkPos = region.getCenterPos();
+                var biome = populationSource.getBiomeForNoiseGen(chunkPos);
+                var features = featureOverrides.get(biome);
+                var defaultFeatures = featureOverrides.get(null);
+                if(defaultFeatures == null && features == null){
+                    return;
+                }
+                if(features == null){
+                    features = defaultFeatures;
+                }else if(defaultFeatures != null){
+                    var newFeatures = new ArrayList<List<Supplier<ConfiguredFeature<?, ?>>>>();
+                    for(int i = 0; i < Math.max(features.size(), defaultFeatures.size()); i++){
+                        newFeatures.add(new ArrayList<>());
+                    }
+                    for(int i = 0; i < features.size(); i++){
+                        newFeatures.get(i).addAll(features.get(i));
+                    }
+                    for(int i = 0; i < defaultFeatures.size(); i++){
+                        newFeatures.get(i).addAll(defaultFeatures.get(i));
+                    }
+                    var iterator = newFeatures.listIterator();
+                    while(iterator.hasNext()){
+                        iterator.set(Collections.unmodifiableList(iterator.next()));
+                    }
+                    features = Collections.unmodifiableList(newFeatures);
+                }
+                
+                int startX = chunkPos.getStartX();
+                int startZ = chunkPos.getStartZ();
+                var blockPos = new BlockPos(startX, region.getBottomY(), startZ);
+                var chunkRandom = new ChunkRandom();
+                var seed = chunkRandom.setPopulationSeed(region.getSeed(), startX, startZ);
+    
+                try{
+                    //noinspection ConstantConditions
+                    ((BiomeDuck)(Object)biome).gud_dims$setFeaturesOverride(features);
+                    biome.generateFeatureStep(accessor, this, region, seed, chunkRandom, blockPos);
+                }catch(Exception e){
+                    var crashReport = CrashReport.create(e, "Biome decoration");
+                    crashReport.addElement("Generation").add("CenterX", chunkPos.x).add("CenterZ", chunkPos.z).add("Seed", seed).add("Biome", biome);
+                    throw new CrashException(crashReport);
+                }finally{
+                    //noinspection ConstantConditions
+                    ((BiomeDuck)(Object)biome).gud_dims$setFeaturesOverride(null);
+                }
+            }
+    
+            @Override
+            public void carve(long seed, BiomeAccess access, Chunk chunk, GenerationStep.Carver carver){
+            
+            }
+        };
         List<Spawner> entitySpawners = List.of();
         
         var world = new ServerWorld(

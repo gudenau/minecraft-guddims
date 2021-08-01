@@ -1,9 +1,12 @@
 package net.gudenau.minecraft.dims.api.v0.attribute;
 
-import net.minecraft.world.gen.feature.Feature;
+import java.util.function.Supplier;
+import net.minecraft.world.gen.feature.ConfiguredFeature;
 
 public interface FeatureDimAttribute extends DimAttribute{
-    Feature<?> getFeature();
+    Supplier<ConfiguredFeature<?, ?>> getFeature();
+    
+    int getFeatureStep();
     
     @Override
     default DimAttributeType getType(){

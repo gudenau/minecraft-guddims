@@ -4,6 +4,7 @@
   "package": "net.gudenau.minecraft.dims.mixin",
   "compatibilityLevel": "JAVA_16",
   "mixins": [
+    "BiomeMixin",
     "EntityMixin",
     "MinecraftServerMixin",
     "ServerPlayerEntityMixin"

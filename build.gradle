@@ -40,3 +40,7 @@ jar {
 		rename { "${it}_${project.archivesBaseName}"}
 	}
 }
+
+minecraft {
+	accessWidener = file("src/main/resources/gud_dims.accesswidener")
+}

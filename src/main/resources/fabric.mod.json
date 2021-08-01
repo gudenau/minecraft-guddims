@@ -33,6 +33,7 @@
     "gud_dims.mixins.json",
     "gud_dims.accessors.json"
   ],
+  "accessWidener": "gud_dims.accesswidener",
 
   "depends": {
     "fabricloader": ">=0.7.4",

@@ -6,6 +6,7 @@ import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -40,6 +41,8 @@ import net.minecraft.util.registry.Registry;
 import net.minecraft.util.registry.RegistryKey;
 import net.minecraft.world.Heightmap;
 import net.minecraft.world.World;
+import net.minecraft.world.gen.GenerationStep;
+import net.minecraft.world.gen.feature.ConfiguredFeature;
 
 /**
  * The implementation of the registry.
@@ -104,17 +107,17 @@ public final class DimRegistryImpl implements DimRegistry{
             case FLUID -> fluidAttributeList;
             case COLOR -> colorAttributeList;
             case BIOME -> biomeAttributeList;
-            case BIOME_CONTROLLER -> Collections.unmodifiableList(biomeControllerAttributeList);
+            case BIOME_CONTROLLER -> biomeControllerAttributeList;
             case DIGIT -> digitAttributeList;
             case BOOLEAN -> booleanAttributeList;
-            case WEATHER -> Collections.unmodifiableList(weatherAttributeList);
-            case SKYLIGHT -> Collections.unmodifiableList(skylightAttributeList);
-            case CELESTIAL -> Collections.unmodifiableList(celestialAttributeList);
+            case WEATHER -> weatherAttributeList;
+            case SKYLIGHT -> skylightAttributeList;
+            case CELESTIAL -> celestialAttributeList;
             case CELESTIAL_PROPERTY -> celestialPropertyAttributeList;
-            case FEATURE -> Collections.unmodifiableList(featureAttributeList);
+            case FEATURE -> featureAttributeList;
             case FEATURE_CONTROLLER -> featureControllerAttributeList;
         };
-        return result == null ? List.of() : result;
+        return result == null ? List.of() : Collections.unmodifiableList(result);
     }
     
     @Override
@@ -373,6 +376,47 @@ public final class DimRegistryImpl implements DimRegistry{
             .map((biome)->(BiomeDimAttribute)new BiomeDimAttributeImpl(biome, biomeRegistry.getId(biome)))
             .toList();
         biomeAttributeMap = toMap(biomeAttributeList);
+    
+        // This is stupid.
+        int featureStepCount = GenerationStep.Feature.values().length;
+        List<Set<ConfiguredFeature<?, ?>>> featureSetList = new ArrayList<>();
+        for(int i = 0; i < featureStepCount; i++){
+            featureSetList.add(new HashSet<>());
+        }
+        biomeRegistry.stream()
+            .map((biome)->biome.getGenerationSettings().getFeatures())
+            .forEach((biomeFeatureListList)->{
+                for(int i = 0; i < biomeFeatureListList.size(); i++){
+                    var biomeFeatureList = biomeFeatureListList.get(i);
+                    if(biomeFeatureList == null || biomeFeatureList.isEmpty()){
+                        continue;
+                    }
+                    var featureSet = featureSetList.get(i);
+                    biomeFeatureList.stream()
+                        .map(Supplier::get)
+                        .forEach(featureSet::add);
+                }
+            });
+        
+        var featureRegistry = registryManager.getMutable(Registry.CONFIGURED_FEATURE_KEY);
+        featureAttributeList = featureRegistry.stream()
+            .map((feature)->{
+                int featureStep = -1;
+                for(int i = 0; i < featureStepCount; i++){
+                    if(featureSetList.get(i).contains(feature)){
+                        featureStep = i;
+                        break;
+                    }
+                }
+                if(featureStep == -1){
+                    return null;
+                }
+                
+                return (FeatureDimAttribute)new FeatureDimAttributeImpl(feature, featureStep, featureRegistry.getId(feature));
+            })
+            .filter(Objects::nonNull)
+            .toList();
+        featureAttributeMap = toMap(featureAttributeList);
     }
     
     public void saveWorlds(MinecraftServer server){
@@ -478,11 +522,6 @@ public final class DimRegistryImpl implements DimRegistry{
             .map((attribute)->(CelestialPropertyDimAttribute)attribute)
             .toList();
         celestialPropertyAttributeMap = toMap(celestialPropertyAttributeList);
-        
-        featureAttributeList = Registry.FEATURE.stream()
-            .map((feature)->(FeatureDimAttribute)new FeatureDimAttributeImpl(feature, Registry.FEATURE.getId(feature)))
-            .toList();
-        featureAttributeMap = toMap(featureAttributeList);
     }
     
     private static <T extends DimAttribute> Map<Identifier, T> toMap(List<T> attributes){
