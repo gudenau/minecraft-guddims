@@ -130,10 +130,10 @@ public final class Dims implements ModInitializer, DimsInitializer{
             register("anchor_minter", ANCHOR_MINTER);
             register("dimension_builder", DIMENSION_BUILDER);
             register("priscillite", PRISCILLITE);
-            register("portal", PORTAL);
-            register("portal_receptacle", PORTAL_RECEPTACLE);
             register("priscillite_polished", PRISCILLITE_POLISHED);
             register("priscillite_embossed", PRISCILLITE_EMBOSSED);
+            register("portal", PORTAL);
+            register("portal_receptacle", PORTAL_RECEPTACLE);
             
             Entities.init();
         }
@@ -206,6 +206,7 @@ public final class Dims implements ModInitializer, DimsInitializer{
         
         public static final Item DIMENSION_ANCHOR = new DimensionAnchorItem(new FabricItemSettings().group(GROUP).maxCount(1));
         public static final Item DIMENSION_TOKEN = new DimensionTokenItem(new FabricItemSettings().group(GROUP).maxCount(1));
+        public static final
         
         public static final BlockItem ANCHOR_MINTER = new BlockItem(Blocks.ANCHOR_MINTER, new FabricItemSettings().group(GROUP));
         public static final BlockItem DIMENSION_BUILDER = new BlockItem(Blocks.DIMENSION_BUILDER, new FabricItemSettings().group(GROUP));
@@ -231,9 +232,9 @@ public final class Dims implements ModInitializer, DimsInitializer{
             register(DIMENSION_BUILDER);
             register(ANCHOR_MINTER);
             register(PRISCILLITE);
-            register(PORTAL_RECEPTACLE);
             register(PRISCILLITE_POLISHED);
             register(PRISCILLITE_EMBOSSED);
+            register(PORTAL_RECEPTACLE);
         }
     }
     
