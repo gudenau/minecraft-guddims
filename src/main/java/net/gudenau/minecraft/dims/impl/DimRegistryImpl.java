@@ -43,6 +43,7 @@ import net.minecraft.world.Heightmap;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.GenerationStep;
 import net.minecraft.world.gen.feature.ConfiguredFeature;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * The implementation of the registry.
@@ -152,13 +153,25 @@ public final class DimRegistryImpl implements DimRegistry{
     }
     
     @Override
-    public Optional<UUID> createDimension(MinecraftServer server, List<DimAttribute> attributes){
+    public Optional<UUID> createDimension(MinecraftServer server, @Nullable String name, List<DimAttribute> attributes){
         UUID uuid = UUID.randomUUID();
         while(dimensions.containsKey(uuid)){
             uuid = UUID.randomUUID();
         }
         
-        var info = new DimInfo(server, uuid, "gud_dims_" + dimensions.size(), attributes);
+        //FIXME This is trash.
+        int dimensionIndex = 0;
+        String dimensionName = name == null ? "gud_dims_0" : name;
+        do{
+            var lambdaName = dimensionName;
+            if(dimensions.values().stream().noneMatch((dim)->dim.getName().equals(lambdaName))){
+                break;
+            }
+            dimensionIndex++;
+            dimensionName = name == null ? "gud_dims_" + dimensionIndex : name + "_" + dimensionIndex;
+        }while(true);
+        
+        var info = new DimInfo(server, uuid, dimensionName, true, attributes);
         
         synchronized(pendingDims){
             pendingDims.add(info);
@@ -283,6 +296,12 @@ public final class DimRegistryImpl implements DimRegistry{
             case CELESTIAL -> celestialAttributeMap.get(id);
             case FEATURE -> featureAttributeMap.get(id);
         });
+    }
+    
+    //TODO Optimize?
+    @Override
+    public Optional<DimInfo> getDimensionInfo(RegistryKey<World> key){
+        return dimensions.values().stream().filter((dimInfo)->dimInfo.getRegistryKey().equals(key)).findAny();
     }
     
     public void init(MinecraftServer server){

@@ -5,12 +5,14 @@ import net.gudenau.minecraft.dims.api.v0.attribute.DimAttribute;
 import net.gudenau.minecraft.dims.api.v0.attribute.DimAttributeType;
 import net.gudenau.minecraft.dims.api.v0.controller.ControllerType;
 import net.gudenau.minecraft.dims.api.v0.controller.DimController;
+import net.gudenau.minecraft.dims.impl.DimInfo;
 import net.gudenau.minecraft.dims.impl.DimRegistryImpl;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.RegistryKey;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * A centralized place to interact with this mod. It provides information about dimensions, dimension attributes as well
@@ -101,7 +103,21 @@ public interface DimRegistry{
      * @param attributes The attributes of the new dimension
      * @return The UUID of the dimension, or empty
      */
-    Optional<UUID> createDimension(MinecraftServer server, List<DimAttribute> attributes);
+    default Optional<UUID> createDimension(MinecraftServer server, List<DimAttribute> attributes){
+        return createDimension(server, null, attributes);
+    }
+    
+    /**
+     * Attempts to create a new dimension from a list of attributes.
+     *
+     * If the dimension was created successfully a UUID will be returned, if it failed empty will be returned.
+     *
+     * @param server An instance of the running server
+     * @param name The name of the new dimension
+     * @param attributes The attributes of the new dimension
+     * @return The UUID of the dimension, or empty
+     */
+    Optional<UUID> createDimension(MinecraftServer server, @Nullable String name, List<DimAttribute> attributes);
     
     /**
      * Gets the registry key for a dimension, or empty if it does not exist.
@@ -155,4 +171,6 @@ public interface DimRegistry{
      * @since 0.0.4
      */
     <T> Optional<T> getController(ControllerType type, Identifier id);
+    
+    Optional<DimInfo> getDimensionInfo(RegistryKey<World> key);
 }

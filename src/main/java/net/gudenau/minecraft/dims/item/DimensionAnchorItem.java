@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 import net.fabricmc.fabric.api.util.NbtType;
 import net.gudenau.minecraft.dims.Dims;
+import net.gudenau.minecraft.dims.api.v0.DimRegistry;
 import net.gudenau.minecraft.dims.api.v0.util.DimensionalTeleportTarget;
 import net.gudenau.minecraft.dims.block.entity.PortalBlockEntity;
 import net.gudenau.minecraft.dims.util.MiscStuff;
@@ -117,8 +118,17 @@ public final class DimensionAnchorItem extends Item{
         getTarget(stack).ifPresent((target)->{
             var pos = target.position();
             tooltip.add(new TranslatableText("tooltip.gud_dims.target.pos", (long)(pos.x * 10) / 10F, (long)(pos.y * 10) / 10F, (long)(pos.z * 10) / 10F));
-            var dimension = target.world().getValue();
-            tooltip.add(new TranslatableText("tooltip.gud_dims.target.dim", dimension.toString()));
+            var worldKey = target.world();
+            DimRegistry.getInstance().getDimensionInfo(worldKey).ifPresent((info)->{
+                if(info.hasCustomName()){
+                    tooltip.add(
+                        new TranslatableText("tooltip.gud_dims.world_name")
+                            .append(Text.of(": "))
+                            .append(Text.of(info.getName()))
+                    );
+                }
+            });
+            tooltip.add(new TranslatableText("tooltip.gud_dims.target.dim", worldKey.getValue().toString()));
         });
     }
     

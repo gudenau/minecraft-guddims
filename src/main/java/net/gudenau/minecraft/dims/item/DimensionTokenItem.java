@@ -33,12 +33,21 @@ public final class DimensionTokenItem extends Item{
     
     @Override
     public void appendTooltip(ItemStack stack, @Nullable World world, List<Text> tooltip, TooltipContext context){
-        getWorld(stack).ifPresent((key)->
+        getWorld(stack).ifPresent((key)->{
+            DimRegistry.getInstance().getDimensionInfo(key).ifPresent((info)->{
+                if(info.hasCustomName()){
+                    tooltip.add(
+                        new TranslatableText("tooltip.gud_dims.world_name")
+                            .append(Text.of(": "))
+                            .append(Text.of(info.getName()))
+                    );
+                }
+            });
             tooltip.add(new TranslatableText("tooltip.gud_dims.world")
                 .append(Text.of(": "))
                 .append(Text.of(key.getValue().toString()))
-            )
-        );
+            );
+        });
     }
     
     @Override
@@ -97,6 +106,7 @@ public final class DimensionTokenItem extends Item{
      * Creates a token from a registry key and a set of attributes.
      *
      * @param world The registry key
+     * @param name The name of the world
      * @param attributes The attributes
      * @return The new token stack
      */

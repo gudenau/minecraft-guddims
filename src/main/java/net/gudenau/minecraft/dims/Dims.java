@@ -206,7 +206,7 @@ public final class Dims implements ModInitializer, DimsInitializer{
         
         public static final Item DIMENSION_ANCHOR = new DimensionAnchorItem(new FabricItemSettings().group(GROUP).maxCount(1));
         public static final Item DIMENSION_TOKEN = new DimensionTokenItem(new FabricItemSettings().group(GROUP).maxCount(1));
-        public static final
+        public static final Item DIMENSION_CORE = new Item(new FabricItemSettings().group(GROUP).maxCount(1));
         
         public static final BlockItem ANCHOR_MINTER = new BlockItem(Blocks.ANCHOR_MINTER, new FabricItemSettings().group(GROUP));
         public static final BlockItem DIMENSION_BUILDER = new BlockItem(Blocks.DIMENSION_BUILDER, new FabricItemSettings().group(GROUP));
@@ -228,6 +228,7 @@ public final class Dims implements ModInitializer, DimsInitializer{
             
             register("dimension_anchor", DIMENSION_ANCHOR);
             register("dimension_token", DIMENSION_TOKEN);
+            register("dimension_core", DIMENSION_CORE);
             
             register(DIMENSION_BUILDER);
             register(ANCHOR_MINTER);

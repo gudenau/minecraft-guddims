@@ -16,6 +16,7 @@ import net.gudenau.minecraft.dims.api.v0.controller.WeatherDimController;
 import net.gudenau.minecraft.dims.api.v0.util.collection.ObjectIntPair;
 import net.gudenau.minecraft.dims.duck.BiomeDuck;
 import net.gudenau.minecraft.dims.impl.controller.celestial.object.*;
+import net.gudenau.minecraft.dims.util.MiscStuff;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.server.MinecraftServer;
@@ -58,11 +59,13 @@ public final class DimInfo{
     private static final Random RANDOM = new Random(System.nanoTime() ^ 0xDEADC0DEDEADBEEFL);
     
     private final UUID uuid;
+    private final String registryName;
     private final String name;
     private final List<DimAttribute> attributes;
     private final RegistryKey<World> registryKey;
     private final RegistryKey<DimensionType> dimensionTypeKey;
     private final Random random;
+    private final boolean hasCustomName;
     
     private BiomeSource biomeSource;
     private DimensionWorldProperties worldProps;
@@ -73,6 +76,12 @@ public final class DimInfo{
     DimInfo(MinecraftServer server, NbtCompound tag){
         uuid = tag.getUuid("uuid");
         name = tag.getString("name");
+        if(tag.contains("registry_name")){
+            registryName = tag.getString("registry_name");
+        }else{
+            registryName = MiscStuff.sanitizeName(name);
+        }
+        hasCustomName = tag.getBoolean("custom_name");
         random = new Random(uuid.getLeastSignificantBits() ^ uuid.getMostSignificantBits() ^ System.currentTimeMillis());
         
         var attributes = new ArrayList<DimAttribute>();
@@ -86,8 +95,8 @@ public final class DimInfo{
         }
         this.attributes = Collections.unmodifiableList(attributes);
     
-        registryKey = RegistryKey.of(Registry.WORLD_KEY, new Identifier(MOD_ID, getName()));
-        dimensionTypeKey = RegistryKey.of(Registry.DIMENSION_TYPE_KEY, new Identifier(MOD_ID, getName()));
+        registryKey = RegistryKey.of(Registry.WORLD_KEY, new Identifier(MOD_ID, getRegistryName()));
+        dimensionTypeKey = RegistryKey.of(Registry.DIMENSION_TYPE_KEY, new Identifier(MOD_ID, getRegistryName()));
         
         //TODO Make this NBT based
         parseAttributes(server, attributes);
@@ -104,12 +113,14 @@ public final class DimInfo{
         dimensionType = loadDimType(server, tag.getCompound("dimType"));
     }
     
-    public DimInfo(MinecraftServer server, UUID uuid, String name, List<DimAttribute> attributes){
+    public DimInfo(MinecraftServer server, UUID uuid, String name, boolean hasCustomName, List<DimAttribute> attributes){
         this.uuid = uuid;
         this.name = name;
+        this.registryName = MiscStuff.sanitizeName(name);
+        this.hasCustomName = hasCustomName;
         random = new Random(uuid.getLeastSignificantBits() ^ uuid.getMostSignificantBits() ^ System.currentTimeMillis());
-        registryKey = RegistryKey.of(Registry.WORLD_KEY, new Identifier(MOD_ID, getName()));
-        dimensionTypeKey = RegistryKey.of(Registry.DIMENSION_TYPE_KEY, new Identifier(MOD_ID, getName()));
+        registryKey = RegistryKey.of(Registry.WORLD_KEY, new Identifier(MOD_ID, getRegistryName()));
+        dimensionTypeKey = RegistryKey.of(Registry.DIMENSION_TYPE_KEY, new Identifier(MOD_ID, getRegistryName()));
         parseAttributes(server, attributes);
         this.attributes = List.copyOf(attributes);
     }
@@ -440,6 +451,7 @@ public final class DimInfo{
         tag.putUuid("uuid", uuid);
         
         tag.putString("name", name);
+        tag.putBoolean("custom_name", hasCustomName);
         
         var attributeList = new NbtList();
         for(DimAttribute attribute : attributes){
@@ -635,5 +647,13 @@ public final class DimInfo{
      */
     public RegistryKey<DimensionType> getDimensionTypeKey(){
         return dimensionTypeKey;
+    }
+    
+    public boolean hasCustomName(){
+        return hasCustomName;
+    }
+    
+    public String getRegistryName(){
+        return registryName;
     }
 }

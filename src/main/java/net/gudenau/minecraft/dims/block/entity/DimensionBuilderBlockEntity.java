@@ -15,6 +15,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.SidedInventory;
 import net.minecraft.item.*;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -39,6 +40,11 @@ public final class DimensionBuilderBlockEntity extends BlockEntity implements Si
     private static final int[] SLOTS_EXTRACT = new int[]{
         0
     };
+    
+    /**
+     * The dimension core, used to name dimensions.
+     */
+    private ItemStack core = ItemStack.EMPTY;
     
     /**
      * The current attributes in this block.
@@ -68,9 +74,13 @@ public final class DimensionBuilderBlockEntity extends BlockEntity implements Si
         tag.put("output", output.writeNbt(new NbtCompound()));
         
         var items = new NbtList();
-        attributeItems.stream().sequential()
-            .forEach((stack)->items.add(stack.writeNbt(new NbtCompound())));
+        for(var stack : attributeItems){
+            items.add(stack.writeNbt(new NbtCompound()));
+        }
         tag.put("input", items);
+        if(!core.isEmpty()){
+            tag.put("core", core.writeNbt(new NbtCompound()));
+        }
         
         tag.putLong("time", buildingTime);
         
@@ -84,11 +94,13 @@ public final class DimensionBuilderBlockEntity extends BlockEntity implements Si
         output = ItemStack.fromNbt(tag.getCompound("output"));
         
         attributeItems.clear();
-        tag.getList("input", NbtType.COMPOUND).stream()
-            .map((element)->(NbtCompound)element)
-            .map(ItemStack::fromNbt)
-            .forEach(attributeItems::add);
-        
+        for(NbtElement element : tag.getList("input", NbtType.COMPOUND)){
+            NbtCompound nbtCompound = (NbtCompound)element;
+            ItemStack itemStack = ItemStack.fromNbt(nbtCompound);
+            attributeItems.add(itemStack);
+        }
+        core = tag.contains("core") ? ItemStack.fromNbt(tag.getCompound("core")) : ItemStack.EMPTY;
+    
         buildingTime = tag.getLong("time");
     }
     
@@ -120,7 +132,7 @@ public final class DimensionBuilderBlockEntity extends BlockEntity implements Si
         
         var registry = DimRegistry.getInstance();
         // The registry implementation does most of the heavy lifting here
-        var dimension = registry.createDimension(world.getServer(), attributes);
+        var dimension = registry.createDimension(world.getServer(), core.hasCustomName() ? core.getName().asString() : null, attributes);
         if(dimension.isEmpty()){
             return;
         }
@@ -135,7 +147,7 @@ public final class DimensionBuilderBlockEntity extends BlockEntity implements Si
     @Override
     public int size(){
         // Can always add another attribute!
-        return attributeItems.size() + 1;
+        return attributeItems.size() + 2;
     }
     
     @Override
@@ -151,7 +163,10 @@ public final class DimensionBuilderBlockEntity extends BlockEntity implements Si
         if(slot == 0){
             return output;
         }
-        slot--;
+        if(slot == 1){
+            return core;
+        }
+        slot -= 2;
         if(slot >= attributeItems.size()){
             return ItemStack.EMPTY;
         }else{
@@ -164,8 +179,10 @@ public final class DimensionBuilderBlockEntity extends BlockEntity implements Si
         ItemStack stack;
         if(slot == 0){
             stack = output;
+        }else if(slot == 1){
+            stack = core;
         }else{
-            slot--;
+            slot -= 2;
             stack = slot >= attributeItems.size() ? ItemStack.EMPTY : attributeItems.get(slot);
         }
         if(stack.isEmpty() && amount > 0){
@@ -186,7 +203,13 @@ public final class DimensionBuilderBlockEntity extends BlockEntity implements Si
             markDirty();
             return stack;
         }
-        slot--;
+        if(slot == 1){
+            var stack = core;
+            core = ItemStack.EMPTY;
+            markDirty();
+            return stack;
+        }
+        slot -= 2;
         if(slot >= attributeItems.size()){
             return ItemStack.EMPTY;
         }
@@ -204,7 +227,12 @@ public final class DimensionBuilderBlockEntity extends BlockEntity implements Si
             markDirty();
             return;
         }
-        slot--;
+        if(slot == 1){
+            core = stack;
+            markDirty();
+            return;
+        }
+        slot -= 2;
         if(slot >= attributeItems.size()){
             while(slot > attributeItems.size()){
                 attributeItems.add(ItemStack.EMPTY);
@@ -245,13 +273,14 @@ public final class DimensionBuilderBlockEntity extends BlockEntity implements Si
     public void clear(){
         attributeItems.clear();
         output = ItemStack.EMPTY;
+        core = ItemStack.EMPTY;
         markDirty();
     }
     
     @Override
     public int[] getAvailableSlots(Direction side){
         return switch(side){
-            case UP -> IntStream.range(1, attributeItems.size() + 2).toArray();
+            case UP -> IntStream.range(2, attributeItems.size() + 3).toArray();
             case DOWN -> SLOTS_EXTRACT;
             default -> SLOTS_EMPTY;
         };
@@ -259,7 +288,13 @@ public final class DimensionBuilderBlockEntity extends BlockEntity implements Si
     
     @Override
     public boolean canInsert(int slot, ItemStack stack, @Nullable Direction dir){
-        return !isBuilding() && output.isEmpty() && slot > 0 && dir == Direction.UP && stack.getItem() instanceof DimensionAttributeItem;
+        if(isBuilding() || !output.isEmpty() || slot < 1 || dir != Direction.UP){
+            return false;
+        }
+        if(slot == 1){
+            return stack.getItem() == Dims.Items.DIMENSION_CORE;
+        }
+        return stack.getItem() instanceof DimensionAttributeItem;
     }
     
     @Override

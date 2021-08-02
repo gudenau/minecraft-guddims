@@ -63,6 +63,7 @@
   "tooltip.gud_dims.type.feature_controller": "Feature Controller",
   "tooltip.gud_dims.type.weather": "Weather",
   "tooltip.gud_dims.world": "World",
+  "tooltip.gud_dims.world_name": "World Name",
 
   "weather.gud_dims.vanilla": "Normal",
   "weather.gud_dims.clear": "Clear",

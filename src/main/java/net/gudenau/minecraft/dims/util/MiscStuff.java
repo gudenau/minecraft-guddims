@@ -130,4 +130,26 @@ public final class MiscStuff{
             .order(ByteOrder.nativeOrder())
             .asIntBuffer();
     }
+    
+    // TODO Figure out a better way to do this
+    public static String sanitizeName(String string){
+        StringBuilder builder = new StringBuilder();
+        string.chars().forEachOrdered((character)->{
+            if(character >= 'A' && character <= 'Z'){
+                character |= 0b0100000;
+            }
+            if(
+                (character >= 'a' && character <= 'z') ||
+                (character >= '0' && character <= '9') ||
+                character == '.' ||
+                character == '_'
+            ){
+                builder.append(Character.toString(character));
+            }else{
+                builder.append('_');
+            }
+        });
+        
+        return builder.toString();
+    }
 }

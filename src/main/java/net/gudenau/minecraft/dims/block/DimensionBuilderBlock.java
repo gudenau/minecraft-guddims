@@ -62,15 +62,25 @@ public final class DimensionBuilderBlock extends HorizontalFacingEntityBlock{
         if(player.isSneaking()){
             entity.build();
         }else{
-            // Inserting attribute items
+            // Inserting attribute items or the core
             if(entity.getStack(0).isEmpty()){
                 // Check if it's actually a dim attribute
                 var stack = player.getStackInHand(hand);
-                if(stack.isEmpty() || !(stack.getItem() instanceof DimensionAttributeItem)){
-                    return ActionResult.FAIL;
-                }
+                var item = stack.getItem();
+                // Needs a core
+                if(entity.size() == 2){
+                    if(item != Dims.Items.DIMENSION_CORE){
+                        return ActionResult.FAIL;
+                    }
+                    
+                    entity.setStack(1, stack.split(1));
+                }else{
+                    if(stack.isEmpty() || !(stack.getItem() instanceof DimensionAttributeItem)){
+                        return ActionResult.FAIL;
+                    }
     
-                entity.setStack(entity.size(), stack.split(1));
+                    entity.setStack(entity.size(), stack.split(1));
+                }
             }else{
                 // Extract the result
                 var result = entity.removeStack(0);
