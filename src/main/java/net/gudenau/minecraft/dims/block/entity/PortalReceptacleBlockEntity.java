@@ -8,6 +8,7 @@ import net.gudenau.minecraft.dims.api.v0.util.DimensionalTeleportTarget;
 import net.gudenau.minecraft.dims.block.PortalBlock;
 import net.gudenau.minecraft.dims.block.PortalReceptacleBlock;
 import net.gudenau.minecraft.dims.item.DimensionAnchorItem;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.entity.BlockEntity;
@@ -167,7 +168,7 @@ public final class PortalReceptacleBlockEntity extends BlockEntity{
         // Portal frame is valid, create the portal
         var target = optionalTarget.get();
         for(var pos : portalPositions){
-            world.setBlockState(pos, portalState, 0);
+            world.setBlockState(pos, portalState, Block.NOTIFY_LISTENERS);
             var be = world.getBlockEntity(pos);
             ((PortalBlockEntity)be).setTarget(target);
         }

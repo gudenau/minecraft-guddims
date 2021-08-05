@@ -64,9 +64,9 @@ public final class PortalReceptacleBlock extends EntityBlock{
             return ActionResult.SUCCESS;
         }
         
-        var entity = world.getBlockEntity(pos);
-        if(entity instanceof PortalReceptacleBlockEntity){
-            return ((PortalReceptacleBlockEntity)entity).onUse(player, hand, player.getStackInHand(hand));
+        var rawEntity = world.getBlockEntity(pos);
+        if(rawEntity instanceof PortalReceptacleBlockEntity entity){
+            return entity.onUse(player, hand, player.getStackInHand(hand));
         }
         
         return ActionResult.SUCCESS;
