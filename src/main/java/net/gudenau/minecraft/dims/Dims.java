@@ -18,6 +18,7 @@ import net.gudenau.minecraft.dims.block.*;
 import net.gudenau.minecraft.dims.block.entity.DimensionBuilderBlockEntity;
 import net.gudenau.minecraft.dims.block.entity.PortalBlockEntity;
 import net.gudenau.minecraft.dims.block.entity.PortalReceptacleBlockEntity;
+import net.gudenau.minecraft.dims.eval.BlockEvaluator;
 import net.gudenau.minecraft.dims.impl.DimRegistryImpl;
 import net.gudenau.minecraft.dims.impl.client.SkyRegistry;
 import net.gudenau.minecraft.dims.impl.controller.DefaultControllers;
@@ -34,6 +35,7 @@ import net.minecraft.item.*;
 import net.minecraft.sound.BlockSoundGroup;
 import net.minecraft.state.property.IntProperty;
 import net.minecraft.tag.Tag;
+import net.minecraft.text.TranslatableText;
 import net.minecraft.util.DyeColor;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
@@ -83,18 +85,25 @@ public final class Dims implements ModInitializer, DimsInitializer{
     
     private void initServerEventHandlers(){
         ServerLifecycleEvents.SERVER_STARTING.register(DimRegistryImpl.INSTANCE::init);
-        ServerLifecycleEvents.SERVER_STARTED.register(DimRegistryImpl.INSTANCE::createWorlds);
+        ServerLifecycleEvents.SERVER_STARTED.register((server)->{
+            DimRegistryImpl.INSTANCE.createWorlds(server);
+            BlockEvaluator.evaluateServer(server);
+        });
         ServerLifecycleEvents.SERVER_STOPPED.register((server)->{
             try{
                 DimRegistryImpl.INSTANCE.saveWorlds(server);
             }finally{
                 DimRegistryImpl.INSTANCE.deinit(server);
             }
+            BlockEvaluator.clear();
         });
         ServerTickEvents.START_SERVER_TICK.register(DimRegistryImpl.INSTANCE::addWorlds);
         ServerPlayConnectionEvents.JOIN.register((handler, sender, server)->{
             for(var dimension : DimRegistryImpl.INSTANCE.getDimensions()){
                 sender.sendPacket(SkyRegistry.createPacket(dimension));
+            }
+            if(BlockEvaluator.isEvaluating()){
+                handler.player.sendMessage(new TranslatableText("chat.gud_dims.evaluating.ongoing"), false);
             }
         });
     }

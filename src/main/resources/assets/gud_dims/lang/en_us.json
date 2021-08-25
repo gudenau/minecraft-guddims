@@ -21,6 +21,9 @@
   "celestial_property.gud_dims.offset": "Offset",
   "celestial_property.gud_dims.period": "Period",
 
+  "chat.gud_dims.evaluating.ongoing": "[§2gudDims§r] The server is being evaluated, expect some lag.",
+  "chat.gud_dims.evaluating.done": "[§2gudDims§r] Evaluation has finished!",
+
   "digit.gud_dims.digit0": "0",
   "digit.gud_dims.digit1": "1",
   "digit.gud_dims.digit2": "2",

@@ -3,12 +3,16 @@ package net.gudenau.minecraft.dims.util;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMaps;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.ByteOrder;
 import java.nio.IntBuffer;
+import java.nio.file.FileVisitOption;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.gudenau.minecraft.dims.accessor.TimerAccessor;
-import net.gudenau.minecraft.dims.accessor.WorldBorder$PropertiesAccessor;
+import net.gudenau.minecraft.dims.accessor.*;
 import net.gudenau.minecraft.dims.accessor.client.NativeImageAccessor;
 import net.gudenau.minecraft.dims.api.v0.util.DimensionalTeleportTarget;
 import net.gudenau.minecraft.dims.duck.EntityDuck;
@@ -16,10 +20,12 @@ import net.minecraft.client.texture.NativeImage;
 import net.minecraft.entity.Entity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtList;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.DyeColor;
 import net.minecraft.world.border.WorldBorder;
 import net.minecraft.world.timer.Timer;
 import net.minecraft.world.timer.TimerCallbackSerializer;
+import org.jetbrains.annotations.NotNull;
 import org.lwjgl.system.MemoryUtil;
 
 public final class MiscStuff{
@@ -151,5 +157,49 @@ public final class MiscStuff{
         });
         
         return builder.toString();
+    }
+    
+    public static @NotNull Path getSavePath(@NotNull MinecraftServer server){
+        return ((LevelStorage$SessionAccessor)(((MinecraftServerAccessor)server).getSession())).getDirectory().resolve("gud").resolve("dims");
+    }
+    
+    public static void delete(Path path) throws IOException{
+        if(!Files.exists(path)){
+            return;
+        }
+        if(Files.isRegularFile(path)){
+            Files.deleteIfExists(path);
+        }else{
+            try(var stream = Files.walk(path)){
+                stream
+                    .sorted((fileA, fileB)->{
+                        boolean fileAFile = Files.isRegularFile(fileA);
+                        boolean fileBFile = Files.isRegularFile(fileB);
+                        if(fileAFile == fileBFile){
+                            if(!fileAFile){
+                                if(fileA.startsWith(fileB)){
+                                    return -1;
+                                }else if(fileB.startsWith(fileA)){
+                                    return 1;
+                                }
+                            }
+                            return 0;
+                        }else if(fileAFile){
+                            return -1;
+                        }else{
+                            return 1;
+                        }
+                    })
+                    .forEachOrdered((file)->{
+                        try{
+                            Files.deleteIfExists(file);
+                        }catch(IOException e){
+                            throw new UncheckedIOException(e);
+                        }
+                    });
+            }catch(UncheckedIOException e){
+                throw e.getCause();
+            }
+        }
     }
 }

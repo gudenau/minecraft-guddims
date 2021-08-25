@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableMap;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.*;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -15,7 +14,6 @@ import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.fabric.api.util.NbtType;
 import net.gudenau.minecraft.dims.Dims;
-import net.gudenau.minecraft.dims.accessor.LevelStorage$SessionAccessor;
 import net.gudenau.minecraft.dims.accessor.MinecraftServerAccessor;
 import net.gudenau.minecraft.dims.api.v0.DimRegistry;
 import net.gudenau.minecraft.dims.api.v0.attribute.*;
@@ -44,6 +42,8 @@ import net.minecraft.world.World;
 import net.minecraft.world.gen.GenerationStep;
 import net.minecraft.world.gen.feature.ConfiguredFeature;
 import org.jetbrains.annotations.Nullable;
+
+import static net.gudenau.minecraft.dims.util.MiscStuff.getSavePath;
 
 /**
  * The implementation of the registry.
@@ -459,10 +459,6 @@ public final class DimRegistryImpl implements DimRegistry{
         }catch(IOException e){
             throw new UncheckedIOException("Failed to save dims", e);
         }
-    }
-    
-    private Path getSavePath(MinecraftServer server){
-        return ((LevelStorage$SessionAccessor)(((MinecraftServerAccessor)server).getSession())).getDirectory().resolve("gud").resolve("dims");
     }
     
     public void deinit(MinecraftServer server){

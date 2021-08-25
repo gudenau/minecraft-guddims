@@ -3,6 +3,7 @@ package net.gudenau.minecraft.dims.impl;
 import com.mojang.serialization.Lifecycle;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import java.util.*;
+import java.util.concurrent.Executor;
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -45,6 +46,7 @@ import net.minecraft.world.gen.chunk.ChunkGeneratorSettings;
 import net.minecraft.world.gen.chunk.NoiseChunkGenerator;
 import net.minecraft.world.gen.feature.ConfiguredFeature;
 import net.minecraft.world.level.ServerWorldProperties;
+import net.minecraft.world.level.storage.LevelStorage;
 import org.jetbrains.annotations.Nullable;
 
 import static net.gudenau.minecraft.dims.Dims.MOD_ID;
@@ -594,7 +596,7 @@ public final class DimInfo{
         };
         List<Spawner> entitySpawners = List.of();
         
-        var world = new ServerWorld(
+        var world = new DimWorld(
             server,
             ((MinecraftServerAccessor)server).getWorkerExecutor(),
             ((MinecraftServerAccessor)server).getSession(),
@@ -607,15 +609,22 @@ public final class DimInfo{
             seed,
             entitySpawners,
             false // Handled elsewhere
-        ){
-            @Override
-            public void tick(BooleanSupplier shouldKeepTicking){
-                worldProps.tick();
-                super.tick(shouldKeepTicking);
-            }
-        };
+        );
+        //noinspection ConstantConditions
         ((WorldAccessor)(Object)world).setRandom(random);
         return world;
+    }
+    
+    public final class DimWorld extends ServerWorld{
+        public DimWorld(MinecraftServer server, Executor workerExecutor, LevelStorage.Session session, ServerWorldProperties properties, RegistryKey<World> worldKey, DimensionType dimensionType, WorldGenerationProgressListener worldGenerationProgressListener, ChunkGenerator chunkGenerator, boolean debugWorld, long seed, List<Spawner> spawners, boolean shouldTickTime){
+            super(server, workerExecutor, session, properties, worldKey, dimensionType, worldGenerationProgressListener, chunkGenerator, debugWorld, seed, spawners, shouldTickTime);
+        }
+        
+        @Override
+        public void tick(BooleanSupplier shouldKeepTicking){
+            worldProps.tick();
+            super.tick(shouldKeepTicking);
+        }
     }
     
     /**

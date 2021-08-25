@@ -6,7 +6,9 @@
   "mixins": [
     "BiomeMixin",
     "EntityMixin",
+    "LevelStorage$SessionMixin",
     "MinecraftServerMixin",
+    "ServerChunkManager$MainThreadExecutorMixin",
     "ServerPlayerEntityMixin"
   ],
   "client": [

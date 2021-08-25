@@ -1,2 +1,10 @@
 accessWidener	v1	named
+
+# Used to allow us to mess with world gen more.
 extendable	class	net/minecraft/world/gen/chunk/NoiseChunkGenerator
+
+# Used to allow us to create dummy worlds in temp dirs outside of the saves.
+# These temporary worlds are used to calculate the rarity of things for stability.
+mutable		field	net/minecraft/world/level/storage/LevelStorage$Session	directoryName	Ljava/lang/String;
+mutable		field	net/minecraft/world/level/storage/LevelStorage$Session	directory	Ljava/nio/file/Path;
+mutable		field	net/minecraft/world/level/storage/LevelStorage$Session	lock	Lnet/minecraft/world/level/storage/SessionLock;
