@@ -4,13 +4,14 @@ import java.util.function.Supplier;
 import net.gudenau.minecraft.dims.api.v0.attribute.FeatureDimAttribute;
 import net.minecraft.util.Identifier;
 import net.minecraft.world.gen.feature.ConfiguredFeature;
+import net.minecraft.world.gen.feature.PlacedFeature;
 
 public class FeatureDimAttributeImpl implements FeatureDimAttribute{
-    private final Supplier<ConfiguredFeature<?, ?>> feature;
+    private final Supplier<PlacedFeature> feature;
     private final int featureStep;
     private final Identifier id;
     
-    public FeatureDimAttributeImpl(ConfiguredFeature<?, ?> feature, int featureStep, Identifier id){
+    public FeatureDimAttributeImpl(PlacedFeature feature, int featureStep, Identifier id){
         this.feature = ()->feature;
         this.featureStep = featureStep;
         this.id = id;
@@ -22,7 +23,7 @@ public class FeatureDimAttributeImpl implements FeatureDimAttribute{
     }
     
     @Override
-    public Supplier<ConfiguredFeature<?, ?>> getFeature(){
+    public Supplier<PlacedFeature> getFeature(){
         return feature;
     }
     
