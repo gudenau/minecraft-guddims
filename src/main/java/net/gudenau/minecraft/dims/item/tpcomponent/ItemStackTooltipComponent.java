@@ -34,7 +34,7 @@ public final class ItemStackTooltipComponent implements TooltipComponent{
     }
     
     @Override
-    public void drawItems(TextRenderer textRenderer, int x, int y, MatrixStack matrices, ItemRenderer itemRenderer, int z, TextureManager textureManager){
+    public void drawItems(TextRenderer textRenderer, int x, int y, MatrixStack matrices, ItemRenderer itemRenderer, int z){
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         RenderSystem.setShaderTexture(0, BundleTooltipComponent.TEXTURE);
         DrawableHelper.drawTexture(matrices, x, y, z, 0, 0, 18, 18, 128, 128);

@@ -17,7 +17,7 @@ import net.minecraft.util.math.Matrix4f;
 public final class PortalBlockEntityRenderer implements BlockEntityRenderer<PortalBlockEntity>{
     @Override
     public void render(PortalBlockEntity endPortalBlockEntity, float f, MatrixStack matrixStack, VertexConsumerProvider vertexConsumerProvider, int i, int j){
-        Matrix4f matrix4f = matrixStack.peek().getModel();
+        Matrix4f matrix4f = matrixStack.peek().getPositionMatrix();
         render(endPortalBlockEntity, matrix4f, vertexConsumerProvider.getBuffer(RenderLayer.getEndPortal()));
     }
     

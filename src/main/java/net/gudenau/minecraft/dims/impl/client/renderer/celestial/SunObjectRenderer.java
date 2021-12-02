@@ -46,7 +46,7 @@ public final class SunObjectRenderer implements SimpleCelestialObjectRenderer{
         
         matrixStack.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion((-90 + inclination) % 360));
         matrixStack.multiply(Vec3f.POSITIVE_X.getDegreesQuaternion(sunAngle * 360));
-        Matrix4f model = matrixStack.peek().getModel();
+        Matrix4f model = matrixStack.peek().getPositionMatrix();
     
         RenderSystem.enableTexture();
         RenderSystem.blendFuncSeparate(GlStateManager.SrcFactor.SRC_ALPHA, GlStateManager.DstFactor.ONE, GlStateManager.SrcFactor.ONE, GlStateManager.DstFactor.ZERO);

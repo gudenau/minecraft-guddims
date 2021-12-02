@@ -97,7 +97,7 @@ public final class DimensionAttributeItem extends Item{
             return Optional.empty();
         }
         
-        var tag = stack.getTag();
+        var tag = stack.getNbt();
         if(tag == null){
             return Optional.empty();
         }
@@ -115,7 +115,7 @@ public final class DimensionAttributeItem extends Item{
      */
     public static ItemStack getStack(DimAttribute attribute){
         var stack = new ItemStack(Dims.Items.DIMENSION_ATTRIBUTE);
-        var tag = stack.getOrCreateTag();
+        var tag = stack.getOrCreateNbt();
         tag.putString("AttributeKind", attribute.getType().getId().toString());
         tag.putString("Attribute", attribute.getId().toString());
         return stack;

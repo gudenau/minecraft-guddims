@@ -30,7 +30,7 @@ public final class StarsRenderer implements CelestialObjectRenderer{
         float starColor = world.method_23787(tickDelta) * (1.0F - world.getRainGradient(tickDelta));
         if(starColor > 0){
             RenderSystem.setShaderColor(starColor * red, starColor * green, starColor * blue, starColor);
-            ((WorldRendererAccessor)renderer).getStarsBuffer().setShader(matrixStack.peek().getModel(), projection, GameRenderer.getPositionShader());
+            ((WorldRendererAccessor)renderer).getStarsBuffer().setShader(matrixStack.peek().getPositionMatrix(), projection, GameRenderer.getPositionShader());
         }
     }
     

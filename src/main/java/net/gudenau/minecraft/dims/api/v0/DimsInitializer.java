@@ -1,7 +1,7 @@
 package net.gudenau.minecraft.dims.api.v0;
 
 /**
- * Used for mods that want to add specilized attributes.
+ * Used for mods that want to add specialized attributes.
  *
  * Not required for things that have vanilla registries, like blocks or biomes.
  *

@@ -168,7 +168,7 @@ public final class AttributeItemModel implements UnbakedModel, BakedModel, Fabri
     }
     
     @Override
-    public Sprite getSprite(){
+    public Sprite getParticleSprite(){
         return null;
     }
     

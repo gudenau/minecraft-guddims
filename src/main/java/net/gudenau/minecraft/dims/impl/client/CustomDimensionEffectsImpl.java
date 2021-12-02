@@ -4,7 +4,7 @@ import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import java.util.*;
 import net.gudenau.minecraft.dims.accessor.client.WorldRendererAccessor;
-import net.gudenau.minecraft.dims.api.v0.client.DimensionSkyProperties;
+import net.gudenau.minecraft.dims.api.v0.client.CustomDimensionEffects;
 import net.gudenau.minecraft.dims.api.v0.client.renderer.CelestialObjectRenderer;
 import net.gudenau.minecraft.dims.api.v0.controller.CelestialDimController;
 import net.minecraft.client.render.*;
@@ -16,15 +16,15 @@ import net.minecraft.util.math.*;
  *
  * @since 0.0.4
  */
-public final class DimensionSkyPropertiesImpl extends SkyProperties implements DimensionSkyProperties{
+public final class CustomDimensionEffectsImpl extends DimensionEffects implements CustomDimensionEffects{
     /**
      * These render things like the sun and moon.
      */
     private final List<CelestialObjectRenderer> celestialRenderers;
     
-    public DimensionSkyPropertiesImpl(List<CelestialDimController.CelestialObject> objects){
+    public CustomDimensionEffectsImpl(List<CelestialDimController.CelestialObject> objects){
         //TODO Add these as attributes
-        super(128, true, SkyProperties.SkyType.NORMAL, false, false);
+        super(128, true, DimensionEffects.SkyType.NORMAL, false, false);
         
         var skyRenderers = new ArrayList<CelestialObjectRenderer>();
         var starRenderers = new ArrayList<CelestialObjectRenderer>();
@@ -62,7 +62,7 @@ public final class DimensionSkyPropertiesImpl extends SkyProperties implements D
         var client = worldRendererAccessor.getClient();
         
         RenderSystem.disableTexture();
-        Vec3d vec3d = world.method_23777(client.gameRenderer.getCamera().getPos(), tickDelta);
+        Vec3d vec3d = world.getSkyColor(client.gameRenderer.getCamera().getPos(), tickDelta);
         float g = (float)vec3d.x;
         float h = (float)vec3d.y;
         float i = (float)vec3d.z;
@@ -71,10 +71,10 @@ public final class DimensionSkyPropertiesImpl extends SkyProperties implements D
         RenderSystem.depthMask(false);
         RenderSystem.setShaderColor(g, h, i, 1.0F);
         Shader shader = RenderSystem.getShader();
-        worldRendererAccessor.getLightSkyBuffer().setShader(matrixStack.peek().getModel(), projection, shader);
+        worldRendererAccessor.getLightSkyBuffer().setShader(matrixStack.peek().getPositionMatrix(), projection, shader);
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
-        float[] fogColorOverride = world.getSkyProperties().getFogColorOverride(world.getSkyAngle(tickDelta), tickDelta);
+        float[] fogColorOverride = world.getDimensionEffects().getFogColorOverride(world.getSkyAngle(tickDelta), tickDelta);
         if(fogColorOverride != null){
             RenderSystem.setShader(GameRenderer::getPositionColorShader);
             RenderSystem.disableTexture();
@@ -88,7 +88,7 @@ public final class DimensionSkyPropertiesImpl extends SkyProperties implements D
             float fogGreen = fogColorOverride[1];
             float fogBlue = fogColorOverride[2];
             float fogAlpha = fogColorOverride[3];
-            Matrix4f matrix4f2 = matrixStack.peek().getModel();
+            Matrix4f matrix4f2 = matrixStack.peek().getPositionMatrix();
             bufferBuilder.begin(VertexFormat.DrawMode.TRIANGLE_FAN, VertexFormats.POSITION_COLOR);
             bufferBuilder.vertex(matrix4f2, 0.0F, 100.0F, 0.0F).color(fogRed, fogGreen, fogBlue, fogAlpha).next();
         
@@ -124,11 +124,11 @@ public final class DimensionSkyPropertiesImpl extends SkyProperties implements D
         if(darknessHeight < 0.0D){
             matrixStack.push();
             matrixStack.translate(0.0D, 12.0D, 0.0D);
-            worldRendererAccessor.getDarkSkyBuffer().setShader(matrixStack.peek().getModel(), projection, shader);
+            worldRendererAccessor.getDarkSkyBuffer().setShader(matrixStack.peek().getPositionMatrix(), projection, shader);
             matrixStack.pop();
         }
     
-        if(world.getSkyProperties().isAlternateSkyColor()){
+        if(world.getDimensionEffects().isAlternateSkyColor()){
             RenderSystem.setShaderColor(g * 0.2F + 0.04F, h * 0.2F + 0.04F, i * 0.6F + 0.1F, 1.0F);
         }else{
             RenderSystem.setShaderColor(g, h, i, 1.0F);

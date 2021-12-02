@@ -6,9 +6,9 @@ import net.gudenau.minecraft.dims.api.v0.controller.BiomeDimController;
 import net.gudenau.minecraft.dims.api.v0.util.IntRange;
 import net.gudenau.minecraft.dims.api.v0.util.collection.ObjectIntPair;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.source.BiomeSource;
+import net.minecraft.world.biome.source.util.MultiNoiseUtil;
 
 import static net.gudenau.minecraft.dims.Dims.MOD_ID;
 
@@ -62,13 +62,8 @@ public final class CheckerboardBiomeDimControllerImpl implements BiomeDimControl
         }
         
         @Override
-        public Biome getBiomeForNoiseGen(int biomeX, int biomeY, int biomeZ){
+        public Biome getBiome(int biomeX, int biomeY, int biomeZ, MultiNoiseUtil.MultiNoiseSampler sampler){
             return (((biomeX >> 4) & 1) ^ ((biomeZ >> 4) & 1)) == 0 ? biomeA : biomeB;
-        }
-        
-        @Override
-        public Biome getBiomeForNoiseGen(ChunkPos chunkPos){
-            return ((chunkPos.x & 1) ^ (chunkPos.z & 1)) == 0 ? biomeA : biomeB;
         }
     }
 }

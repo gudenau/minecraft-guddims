@@ -45,7 +45,7 @@ public final class MoonObjectRenderer implements SimpleCelestialObjectRenderer{
         
         matrixStack.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion((-90 + inclination) % 360));
         matrixStack.multiply(Vec3f.POSITIVE_X.getDegreesQuaternion(moonAngle * 360));
-        Matrix4f model = matrixStack.peek().getModel();
+        Matrix4f model = matrixStack.peek().getPositionMatrix();
         
         RenderSystem.setShaderColor(red, green, blue, 1.0F - world.getRainGradient(tickDelta));
         RenderSystem.setShader(GameRenderer::getPositionTexShader);

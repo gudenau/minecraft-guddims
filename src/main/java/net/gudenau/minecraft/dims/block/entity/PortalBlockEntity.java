@@ -28,12 +28,11 @@ public final class PortalBlockEntity extends BlockEntity{
     }
     
     @Override
-    public NbtCompound writeNbt(NbtCompound tag){
-        tag = super.writeNbt(tag);
+    public void writeNbt(NbtCompound tag){
+        super.writeNbt(tag);
         if(target != null){
             tag.put("target", target.toNbt());
         }
-        return tag;
     }
     
     @Override

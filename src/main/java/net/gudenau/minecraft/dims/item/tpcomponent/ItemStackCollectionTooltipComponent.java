@@ -41,7 +41,7 @@ public final class ItemStackCollectionTooltipComponent implements TooltipCompone
     }
     
     @Override
-    public void drawItems(TextRenderer textRenderer, int x, int y, MatrixStack matrices, ItemRenderer itemRenderer, int z, TextureManager textureManager){
+    public void drawItems(TextRenderer textRenderer, int x, int y, MatrixStack matrices, ItemRenderer itemRenderer, int z){
         int columns = getColumns();
         int rows = getRows();
         int k = 0;

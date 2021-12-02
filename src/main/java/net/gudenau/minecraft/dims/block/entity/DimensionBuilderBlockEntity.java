@@ -66,8 +66,8 @@ public final class DimensionBuilderBlockEntity extends BlockEntity implements Si
     }
     
     @Override
-    public NbtCompound writeNbt(NbtCompound tag){
-        tag = super.writeNbt(tag);
+    public void writeNbt(NbtCompound tag){
+        super.writeNbt(tag);
         
         trimStacks();
         
@@ -83,8 +83,6 @@ public final class DimensionBuilderBlockEntity extends BlockEntity implements Si
         }
         
         tag.putLong("time", buildingTime);
-        
-        return tag;
     }
     
     @Override

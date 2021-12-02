@@ -2,7 +2,7 @@ package net.gudenau.minecraft.dims.mixin.client;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.gudenau.minecraft.dims.api.v0.client.DimensionSkyProperties;
+import net.gudenau.minecraft.dims.api.v0.client.CustomDimensionEffects;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.WorldRenderer;
 import net.minecraft.client.util.math.MatrixStack;
@@ -23,15 +23,15 @@ public abstract class WorldRendererMixin{
     @Shadow private ClientWorld world;
     
     @Inject(
-        method = "renderSky",
+        method = "renderSky(Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/util/math/Matrix4f;FLjava/lang/Runnable;)V",
         at = @At("HEAD"),
         cancellable = true
     )
     private void renderSky(MatrixStack matrixStack, Matrix4f projection, float tickDelta, Runnable runnable, CallbackInfo ci){
-        var skyProps = client.world.getSkyProperties();
-        if(skyProps instanceof DimensionSkyProperties dimSkyPros){
+        var world = MinecraftClient.getInstance().world;
+        if(world.getDimensionEffects() instanceof CustomDimensionEffects effects){
             runnable.run();
-            dimSkyPros.render(matrixStack, projection, tickDelta, (WorldRenderer)(Object)this);
+            effects.render(matrixStack, projection, tickDelta, (WorldRenderer)(Object)this);
             ci.cancel();
         }
     }

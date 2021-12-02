@@ -43,15 +43,13 @@ public final class PortalReceptacleBlockEntity extends BlockEntity{
     }
     
     @Override
-    public NbtCompound writeNbt(NbtCompound tag){
-        tag = super.writeNbt(tag);
+    public void writeNbt(NbtCompound tag){
+        super.writeNbt(tag);
         
         tag.put("anchor", anchor.writeNbt(new NbtCompound()));
         if(target != null){
             tag.put("target", target.toNbt());
         }
-        
-        return tag;
     }
     
     @Override

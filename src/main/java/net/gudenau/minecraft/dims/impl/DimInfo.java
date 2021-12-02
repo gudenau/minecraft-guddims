@@ -36,7 +36,6 @@ import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.source.BiomeAccess;
 import net.minecraft.world.biome.source.BiomeSource;
-import net.minecraft.world.biome.source.HorizontalVoronoiBiomeAccessType;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.ChunkStatus;
 import net.minecraft.world.dimension.DimensionType;
@@ -384,7 +383,6 @@ public final class DimInfo{
             0,
             256,
             256,
-            HorizontalVoronoiBiomeAccessType.INSTANCE,
             BlockTags.INFINIBURN_OVERWORLD.getId(),
             DimensionType.OVERWORLD_ID,
             0
@@ -430,7 +428,6 @@ public final class DimInfo{
             tag.getInt("minimumY"),
             tag.getInt("height"),
             tag.getInt("logicalHeight"),
-            HorizontalVoronoiBiomeAccessType.INSTANCE,
             BlockTags.INFINIBURN_OVERWORLD.getId(),
             DimensionType.OVERWORLD_ID,
             0
@@ -531,10 +528,12 @@ public final class DimInfo{
         
         long seed = uuid.getLeastSignificantBits() ^ uuid.getMostSignificantBits();
         ChunkGenerator chunkGenerator = new NoiseChunkGenerator(
+            registryManager.get(Registry.NOISE_WORLDGEN),
             biomeSource,
             seed,
             ()->registryManager.get(Registry.CHUNK_GENERATOR_SETTINGS_KEY).getOrThrow(ChunkGeneratorSettings.OVERWORLD)
         ){
+            /*
             @Override
             public void generateFeatures(ChunkRegion region, StructureAccessor accessor){
                 if(featureOverrides == null){
@@ -593,6 +592,7 @@ public final class DimInfo{
             public void carve(long seed, BiomeAccess access, Chunk chunk, GenerationStep.Carver carver){
             
             }
+            */
         };
         List<Spawner> entitySpawners = List.of();
         

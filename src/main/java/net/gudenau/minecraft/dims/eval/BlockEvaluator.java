@@ -96,6 +96,7 @@ public class BlockEvaluator{
                         var seed = 0xDEADBEEFCAFEBABEL; //FIXME
                         
                         var chunkGenerator = new NoiseChunkGenerator(
+                            registryManager.get(Registry.NOISE_WORLDGEN),
                             new FixedBiomeSource(()->biome),
                             seed,
                             ()->registryManager.get(Registry.CHUNK_GENERATOR_SETTINGS_KEY).getOrThrow(switch(biome.getCategory()){
@@ -152,7 +153,7 @@ public class BlockEvaluator{
                                         if(section == null || section.isEmpty()){
                                             continue;
                                         }
-                                        section.getContainer().count((state, count)->blockMap.computeLong(
+                                        section.getBlockStateContainer().count((state, count)->blockMap.computeLong(
                                             state.getBlock(),
                                             (key, storedCount)->storedCount == null ? count : storedCount + count
                                         ));

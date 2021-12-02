@@ -62,7 +62,7 @@ public final class DimensionTokenItem extends Item{
      * @return The registry key or empty
      */
     public static Optional<RegistryKey<World>> getWorld(ItemStack stack){
-        var tag = stack.getTag();
+        var tag = stack.getNbt();
         if(tag == null){
             return Optional.empty();
         }
@@ -80,7 +80,7 @@ public final class DimensionTokenItem extends Item{
      */
     @Deprecated(forRemoval = true)
     public static Optional<List<DimAttribute>> getAttributes(ItemStack stack){
-        var tag = stack.getTag();
+        var tag = stack.getNbt();
         if(tag == null){
             return Optional.empty();
         }
@@ -106,14 +106,13 @@ public final class DimensionTokenItem extends Item{
      * Creates a token from a registry key and a set of attributes.
      *
      * @param world The registry key
-     * @param name The name of the world
      * @param attributes The attributes
      * @return The new token stack
      */
     @Deprecated(forRemoval = true)
     public static ItemStack createToken(RegistryKey<World> world, List<DimAttribute> attributes){
         ItemStack stack = new ItemStack(Dims.Items.DIMENSION_TOKEN);
-        var tag = stack.getOrCreateTag();
+        var tag = stack.getOrCreateNbt();
         tag.putString("world", world.getValue().toString());
         var attributeList = new NbtList();
         for(var attribute : attributes){

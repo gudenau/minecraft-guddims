@@ -13,7 +13,7 @@
   ],
   "client": [
     "client.ResourceReloadLoggerMixin",
-    "client.SkyPropertiesMixin",
+    "client.DimensionEffectsMixin",
     "client.TooltipComponentMixin",
     "client.WorldRendererMixin"
   ],

@@ -45,7 +45,7 @@ public final class EndSkyRenderer implements SimpleCelestialObjectRenderer{
                 case 5 -> matrixStack.multiply(Vec3f.POSITIVE_Z.getDegreesQuaternion(-90.0F));
             }
             
-            Matrix4f matrix4f = matrixStack.peek().getModel();
+            Matrix4f matrix4f = matrixStack.peek().getPositionMatrix();
             bufferBuilder.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_TEXTURE_COLOR);
             bufferBuilder.vertex(matrix4f, -100.0F, -100.0F, -100.0F).texture(0.0F, 0.0F).color(red, green, blue, 255).next();
             bufferBuilder.vertex(matrix4f, -100.0F, -100.0F, 100.0F).texture(0.0F, 16.0F).color(red, green, blue, 255).next();

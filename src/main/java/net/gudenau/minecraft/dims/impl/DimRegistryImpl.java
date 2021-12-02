@@ -34,12 +34,15 @@ import net.minecraft.tag.BlockTags;
 import net.minecraft.util.DyeColor;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Language;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.util.registry.RegistryKey;
 import net.minecraft.world.Heightmap;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.GenerationStep;
+import net.minecraft.world.gen.chunk.ChunkGenerator;
 import net.minecraft.world.gen.feature.ConfiguredFeature;
 import org.jetbrains.annotations.Nullable;
 
@@ -318,52 +321,36 @@ public final class DimRegistryImpl implements DimRegistry{
     
     private void pickWorldSpawn(ServerWorld world){
         var chunkGenerator = world.getChunkManager().getChunkGenerator();
-        var biomeSource = chunkGenerator.getBiomeSource();
-        var random = new Random(world.getSeed());
-        var blockPos = biomeSource.locateBiome(0, world.getSeaLevel(), 0, 256, (biome)->biome.getSpawnSettings().isPlayerSpawnFriendly(), random);
-        if(blockPos == null){
-            System.err.println("Could not find spawn biome");
-        }
-        var chunkPos = blockPos == null ? new ChunkPos(0, 0) : new ChunkPos(blockPos);
-    
-        boolean flag = false;
-        for(var block : BlockTags.VALID_SPAWN.values()){
-            if(biomeSource.getTopMaterials().contains(block.getDefaultState())){
-                flag = true;
-                break;
-            }
-        }
-    
-        int spawnHeight = chunkGenerator.getSpawnHeight(world);
+        var chunkPos = new ChunkPos(chunkGenerator.getMultiNoiseSampler().findBestSpawnPosition());
+        var spawnHeight = chunkGenerator.getSpawnHeight(world);
         if(spawnHeight < world.getBottomY()){
-            var startPos = chunkPos.getStartPos();
-            spawnHeight = world.getTopY(Heightmap.Type.WORLD_SURFACE, startPos.getX() + 8, startPos.getZ() + 8);
+            BlockPos blockPos = chunkPos.getStartPos();
+            spawnHeight = world.getTopY(Heightmap.Type.WORLD_SURFACE, blockPos.getX() + 8, blockPos.getZ() + 8);
         }
-    
-        var worldProperties = (DimensionWorldProperties)world.getLevelProperties();
+        if(!(world.getLevelProperties() instanceof DimensionWorldProperties worldProperties)){
+            return;
+        }
         worldProperties.setSpawnPos(chunkPos.getStartPos().add(8, spawnHeight, 8), 0);
-    
-        int x = 0;
-        int z = 0;
-        int xOffset = 0;
-        int zOffset = -1;
-        for(int i = 0; i < 1024; i++){
-            if(x > -16 && x <= 16 && z > -16 && z <= 16){
-                var serverSpawnPoint = SpawnLocating.findServerSpawnPoint(world, new ChunkPos(chunkPos.x + x, chunkPos.z + z), flag);
-                if(serverSpawnPoint != null){
-                    worldProperties.setSpawnPos(serverSpawnPoint, 0.0F);
+        int offsetX = 0;
+        int offsetZ = 0;
+        int xDelta = 0;
+        int zDelta = -1;
+        for(int i = 0; i < MathHelper.square(11); i++){
+            BlockPos newSpawn;
+            if(offsetX >= -5 && offsetX <= 5 && offsetZ >= -5 && offsetZ <= 5){
+                newSpawn = SpawnLocating.findServerSpawnPoint(world, new ChunkPos(chunkPos.x + offsetX, chunkPos.z + offsetZ));
+                if(newSpawn != null){
+                    worldProperties.setSpawnPos(newSpawn, 0.0f);
                     break;
                 }
             }
-        
-            if(x == z || x < 0 && x == -z || x > 0 && x == 1 - z){
-                int temp = xOffset;
-                xOffset = -zOffset;
-                zOffset = temp;
+            if(offsetX == offsetZ || offsetX < 0 && offsetX == -offsetZ || offsetX > 0 && offsetX == 1 - offsetZ){
+                int blockPos22 = xDelta;
+                xDelta = -zDelta;
+                zDelta = blockPos22;
             }
-        
-            x += xOffset;
-            z += zOffset;
+            offsetX += xDelta;
+            offsetZ += zDelta;
         }
     }
     
@@ -402,6 +389,7 @@ public final class DimRegistryImpl implements DimRegistry{
         for(int i = 0; i < featureStepCount; i++){
             featureSetList.add(new HashSet<>());
         }
+        /*FIXME
         biomeRegistry.stream()
             .map((biome)->biome.getGenerationSettings().getFeatures())
             .forEach((biomeFeatureListList)->{
@@ -416,6 +404,7 @@ public final class DimRegistryImpl implements DimRegistry{
                         .forEach(featureSet::add);
                 }
             });
+         */
         
         var featureRegistry = registryManager.getMutable(Registry.CONFIGURED_FEATURE_KEY);
         featureAttributeList = featureRegistry.stream()

@@ -68,10 +68,10 @@ public final class DimensionAnchorItem extends Item{
         
         // Implement double shift right click to clear
         if(user.isSneaking()){
-            var tag = stack.getTag();
+            var tag = stack.getNbt();
             if(tag != null){
                 if(tag.getLong("cooldown") > world.getTime()){
-                    stack.setTag(null);
+                    stack.setNbt(null);
                 }else{
                     tag.putLong("cooldown", world.getTime() + 20);
                 }
@@ -143,7 +143,7 @@ public final class DimensionAnchorItem extends Item{
             return Optional.empty();
         }
         
-        var tag = stack.getTag();
+        var tag = stack.getNbt();
         if(tag == null){
             return Optional.empty();
         }
@@ -166,7 +166,7 @@ public final class DimensionAnchorItem extends Item{
             return;
         }
         
-        var tag = stack.getOrCreateTag();
+        var tag = stack.getOrCreateNbt();
         tag.put("target", target.toNbt());
     }
 }

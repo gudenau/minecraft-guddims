@@ -11,7 +11,7 @@ import net.minecraft.util.registry.Registry;
 import net.minecraft.world.ChunkRegion;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.GenerationSettings;
-import net.minecraft.world.gen.ChunkRandom;
+import net.minecraft.world.gen.random.ChunkRandom;
 import net.minecraft.world.gen.GenerationStep;
 import net.minecraft.world.gen.StructureAccessor;
 import net.minecraft.world.gen.chunk.ChunkGenerator;
@@ -23,8 +23,8 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 
 @Mixin(Biome.class)
 public abstract class BiomeMixin implements BiomeDuck{
-    @Shadow @Final private GenerationSettings generationSettings;
-    @Shadow @Final private Map<Integer, List<StructureFeature<?>>> structures;
+//    @Shadow @Final private GenerationSettings generationSettings;
+//    @Shadow @Final private Map<Integer, List<StructureFeature<?>>> structures;
     @Unique
     private List<List<Supplier<ConfiguredFeature<?, ?>>>> gud_dims$featuresOverride;
     
@@ -34,6 +34,7 @@ public abstract class BiomeMixin implements BiomeDuck{
         gud_dims$featuresOverride = featuresOverride;
     }
     
+    /*
     @Redirect(
         method = "generateFeatureStep",
         at = @At(
@@ -44,13 +45,15 @@ public abstract class BiomeMixin implements BiomeDuck{
     private List<?> generateFeatureStep(GenerationSettings generationSettings){
         return gud_dims$featuresOverride == null ? generationSettings.getFeatures() : gud_dims$featuresOverride;
     }
+     */
     
-    /**
+    /* *
      * @author FIXME Remove this
      */
+    /*
     @Overwrite
     public void generateFeatureStep(StructureAccessor structureAccessor, ChunkGenerator chunkGenerator, ChunkRegion region, long populationSeed, ChunkRandom random, BlockPos origin) {
-        List<List<Supplier<ConfiguredFeature<?, ?>>>> features = generationSettings.getFeatures();
+        var features = generationSettings.getFeatures();
         Registry<ConfiguredFeature<?, ?>> featureRegistry = region.getRegistryManager().get(Registry.CONFIGURED_FEATURE_KEY);
         Registry<StructureFeature<?>> structureRegistry = region.getRegistryManager().get(Registry.STRUCTURE_FEATURE_KEY);
         int featuresCount = GenerationStep.Feature.values().length;
@@ -73,7 +76,7 @@ public abstract class BiomeMixin implements BiomeDuck{
                     try{
                         int bottomY = region.getBottomY() + 1;
                         int topY = region.getTopY() - 1;
-                        region.method_36972(supplier);
+                        region.setCurrentlyGeneratingStructureName(supplier);
                         structureAccessor.getStructuresWithChildren(ChunkSectionPos.from(origin), structureFeature).forEach((structureStart)->{
                             structureStart.generateStructure(region, structureAccessor, chunkGenerator, random, new BlockBox(blockX, bottomY, blockZ, blockX + 15, topY, blockZ + 15), new ChunkPos(sectionX, sectionZ));
                         });
@@ -97,7 +100,7 @@ public abstract class BiomeMixin implements BiomeDuck{
                     };
                     random.setDecoratorSeed(populationSeed, k, featureStep);
                     try{
-                        region.method_36972(keySupplier);
+                        region.setCurrentlyGeneratingStructureName(keySupplier);
                         feature.generate(region, chunkGenerator, random, origin);
                     }catch(Exception e){
                         var crashReport = CrashReport.create(e, "Feature placement");
@@ -110,6 +113,7 @@ public abstract class BiomeMixin implements BiomeDuck{
             }
         }
         
-        region.method_36972(null);
+        region.setCurrentlyGeneratingStructureName(null);
     }
+     */
 }

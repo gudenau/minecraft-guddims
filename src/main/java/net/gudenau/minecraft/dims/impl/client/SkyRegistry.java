@@ -12,7 +12,7 @@ import net.gudenau.minecraft.dims.api.v0.controller.CelestialDimController;
 import net.gudenau.minecraft.dims.api.v0.controller.ControllerType;
 import net.gudenau.minecraft.dims.impl.DimInfo;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.render.SkyProperties;
+import net.minecraft.client.render.DimensionEffects;
 import net.minecraft.network.Packet;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.util.registry.Registry;
@@ -52,14 +52,14 @@ public final class SkyRegistry{
     }
     
     @Environment(EnvType.CLIENT)
-    private final Map<DimensionType, SkyProperties> skyProperties = new HashMap<>();
+    private final Map<DimensionType, DimensionEffects> skyProperties = new HashMap<>();
     
     public static void reset(){
         INSTANCE = new SkyRegistry();
     }
     
     @Environment(EnvType.CLIENT)
-    public Optional<SkyProperties> getSkyProperties(DimensionType dimensionType){
+    public Optional<DimensionEffects> getSkyProperties(DimensionType dimensionType){
         return Optional.ofNullable(skyProperties.get(dimensionType));
     }
     
@@ -75,6 +75,6 @@ public final class SkyRegistry{
                 .orElseThrow(()->new RuntimeException("Unknown celestial object id " + id));
             objects.add(controller.getController().deserialize(buffer));
         }
-        skyProperties.put(type, new DimensionSkyPropertiesImpl(objects));
+        skyProperties.put(type, new CustomDimensionEffectsImpl(objects));
     }
 }
