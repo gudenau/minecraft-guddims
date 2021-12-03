@@ -30,7 +30,6 @@ import net.minecraft.nbt.NbtList;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.SpawnLocating;
 import net.minecraft.server.world.ServerWorld;
-import net.minecraft.tag.BlockTags;
 import net.minecraft.util.DyeColor;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Language;
@@ -42,8 +41,7 @@ import net.minecraft.util.registry.RegistryKey;
 import net.minecraft.world.Heightmap;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.GenerationStep;
-import net.minecraft.world.gen.chunk.ChunkGenerator;
-import net.minecraft.world.gen.feature.ConfiguredFeature;
+import net.minecraft.world.gen.feature.PlacedFeature;
 import org.jetbrains.annotations.Nullable;
 
 import static net.gudenau.minecraft.dims.util.MiscStuff.getSavePath;
@@ -385,11 +383,10 @@ public final class DimRegistryImpl implements DimRegistry{
     
         // This is stupid.
         int featureStepCount = GenerationStep.Feature.values().length;
-        List<Set<ConfiguredFeature<?, ?>>> featureSetList = new ArrayList<>();
+        List<Set<PlacedFeature>> featureSetList = new ArrayList<>();
         for(int i = 0; i < featureStepCount; i++){
             featureSetList.add(new HashSet<>());
         }
-        /*FIXME
         biomeRegistry.stream()
             .map((biome)->biome.getGenerationSettings().getFeatures())
             .forEach((biomeFeatureListList)->{
@@ -404,9 +401,8 @@ public final class DimRegistryImpl implements DimRegistry{
                         .forEach(featureSet::add);
                 }
             });
-         */
         
-        var featureRegistry = registryManager.getMutable(Registry.CONFIGURED_FEATURE_KEY);
+        var featureRegistry = registryManager.getMutable(Registry.PLACED_FEATURE_KEY);
         featureAttributeList = featureRegistry.stream()
             .map((feature)->{
                 int featureStep = -1;

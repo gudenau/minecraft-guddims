@@ -146,7 +146,7 @@ public final class DimensionAttributeItem extends Item{
                 }
                 case FEATURE -> {
                     var feature = ((FeatureDimAttribute)attribute).getFeature().get();
-                    var featureRegistry = MinecraftClient.getInstance().world.getRegistryManager().getMutable(Registry.CONFIGURED_FEATURE_KEY);
+                    var featureRegistry = MinecraftClient.getInstance().world.getRegistryManager().getMutable(Registry.PLACED_FEATURE_KEY);
                     var featureId = featureRegistry.getId(feature);
                     var featurePath = featureId.getPath();
                     if(featurePath.contains("/")){
